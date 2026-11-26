@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F2A1E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Roça · Rebanho e leite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F5F7; --surface:#FFFFFF; --ink:#1F2A1E; --ink2:#4D5B67; --ink3:#87939D;
+  --line:#E2E7EB; --line2:#CFD7DD; --acc:#2F6B3A; --acc2:#3A7F47; --accbg:#E6F1E7;
+  --jade:#0E7A66; --jadebg:#E3F3EF; --wine:#B23A48; --winebg:#F9E6E8; --amber:#9A6412; --amberbg:#FBF0DC;
+  --r-s:6px; --r-m:10px; --r-l:16px; --side:248px;
+  --money:"Fraunces", Georgia, serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 "Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.money{font-family:var(--money);font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.01em}
+.pos{color:var(--jade)} .neg{color:var(--wine)} .muted{color:var(--ink3)}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.015em}
+
+/* ---------- Login ---------- */
+#login{min-height:100vh;display:none;grid-template-columns:1fr 1fr}
+#login .art{background:var(--ink);color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:space-between}
+#login .art .marca{font-family:var(--money);font-size:44px;line-height:1.05}
+#login .art .marca small{display:block;font-family:"Manrope";font-size:15px;opacity:.7;margin-top:10px;letter-spacing:0}
+#login .art p{max-width:34ch;opacity:.75;margin:0}
+#login form{align-self:center;justify-self:center;width:100%;max-width:360px;padding:32px 24px}
+#login h1{font-size:24px;margin-bottom:6px}
+.field{display:block;margin-top:14px}
+.field>span{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+.inp{width:100%;border:1px solid var(--line2);background:var(--surface);border-radius:var(--r-m);padding:11px 12px;outline:none;transition:border-color .15s}
+.inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--accbg)}
+.inp.num{text-align:right;font-variant-numeric:tabular-nums}
+textarea.inp{min-height:110px;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.msg{font-size:13px;margin-top:12px;min-height:20px}
+.msg.err{color:var(--wine)} .msg.ok{color:var(--jade)}
+
+/* ---------- Botões ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:var(--r-m);padding:10px 16px;font-weight:700;cursor:pointer;background:var(--acc);color:#fff;white-space:nowrap;transition:background .15s}
+.btn:hover{background:var(--acc2)}
+.btn.sec{background:var(--surface);color:var(--ink);border-color:var(--line2)}
+.btn.sec:hover{background:var(--paper)}
+.btn.ghost{background:transparent;color:var(--acc);padding:8px 10px}
+.btn.ghost:hover{background:var(--accbg)}
+.btn.danger{background:var(--surface);color:var(--wine);border-color:var(--line2)}
+.btn.danger:hover{background:var(--winebg)}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:var(--r-s)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.link{background:none;border:0;color:var(--acc);font-weight:600;cursor:pointer;padding:0}
+.icon-btn{background:none;border:0;cursor:pointer;color:var(--ink3);padding:6px;border-radius:var(--r-s);display:inline-flex}
+.icon-btn:hover{background:var(--paper);color:var(--ink)}
+svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ---------- Estrutura ---------- */
+#app{display:none}
+#side{position:fixed;inset:0 auto 0 0;width:var(--side);background:var(--ink);color:#fff;display:flex;flex-direction:column;padding:24px 14px 18px;z-index:20;overflow-y:auto}
+#side .marca{font-family:var(--money);font-size:24px;line-height:1.1;padding:0 10px}
+#side .marca small{display:block;font-family:"Manrope";font-size:12px;opacity:.6;margin-top:4px}
+#side nav{margin-top:28px;display:flex;flex-direction:column;gap:2px}
+#side nav button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:0;color:rgba(255,255,255,.72);padding:10px 12px;border-radius:var(--r-m);cursor:pointer;font-weight:600}
+#side nav button:hover{background:rgba(255,255,255,.07);color:#fff}
+#side nav button.on{background:#fff;color:var(--ink)}
+#side nav .grp{font-size:12px;opacity:.45;padding:18px 12px 6px}
+#side .conta{margin-top:auto;padding:12px;border-top:1px solid rgba(255,255,255,.12);font-size:13px;opacity:.85;word-break:break-all}
+#side .conta button{background:none;border:0;color:#fff;opacity:.7;cursor:pointer;padding:0;margin-top:4px;text-decoration:underline}
+main{margin-left:var(--side);padding:32px 40px 80px;max-width:calc(1180px + var(--side))}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.head h1{font-size:26px}
+.head p{margin:4px 0 0;color:var(--ink2);max-width:62ch}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tools .inp{width:auto}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:20px}
+.panel+.panel{margin-top:16px}
+.panel h2{font-size:16px;margin-bottom:4px}
+.panel .sub{color:var(--ink3);font-size:13px;margin:0 0 14px}
+.panel-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid2>*{min-width:0}
+
+.faixa{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);margin-bottom:16px}
+.faixa>div{padding:18px 20px}
+.faixa>div+div{border-left:1px solid var(--line)}
+.faixa .l{font-size:13px;color:var(--ink2);font-weight:600}
+.faixa .v{font-size:28px;margin-top:4px}
+.faixa .s{font-size:12px;color:var(--ink3)}
+
+/* Tabelas */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;font-weight:700;color:var(--ink3);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tfoot td{border-top:2px solid var(--line2);font-weight:700}
+th.n,td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.act{text-align:right;white-space:nowrap}
+.nc{display:none} .mob{display:none} .tag.nc{display:none}
+.pessoa{display:flex;align-items:center;gap:10px;font-weight:600}
+.av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;flex-shrink:0;color:#fff}
+.placa{display:inline-block;font-weight:700;font-size:13px;letter-spacing:.04em;border:1.5px solid var(--ink);border-radius:5px;padding:0 6px;background:#fff;white-space:nowrap}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap}
+.t-ok{background:var(--jadebg);color:var(--jade)} .t-bad{background:var(--winebg);color:var(--wine)} .t-warn{background:var(--amberbg);color:var(--amber)} .t-mut{background:var(--paper);color:var(--ink3)} .t-acc{background:var(--accbg);color:var(--acc)}
+.vazio{padding:28px 10px;text-align:center;color:var(--ink3)}
+.vazio .btn{margin-top:12px}
+.aviso{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:var(--r-m);background:var(--amberbg);color:#5d3d09;margin-bottom:16px}
+.aviso.ok{background:var(--jadebg);color:#0b4f42}
+.aviso.info{background:var(--accbg);color:#123c52}
+.aviso b{display:block}
+
+/* ---------- Calendário ---------- */
+.mesnav{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);padding:4px}
+.mesnav .lbl{padding:0 10px;font-weight:700;min-width:150px;text-align:center}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .dow{font-size:12px;font-weight:700;color:var(--ink3);text-align:center;padding:4px 0}
+.cal .d{min-height:92px;border-radius:var(--r-s);background:var(--paper);padding:6px;font-size:13px;position:relative;cursor:pointer;border:1px solid transparent;text-align:left;display:flex;flex-direction:column}
+.cal .d:hover{border-color:var(--line2)}
+.cal .d.fora{opacity:.35;cursor:default}
+.cal .d.hoje{outline:2px solid var(--acc)}
+.cal .d .n{font-weight:700;display:flex;justify-content:space-between}
+.cal .d .n .q{font-size:11px;color:var(--acc)}
+.cal .d .chips{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.cal .d .chip{font-size:11px;font-weight:700;color:#fff;border-radius:4px;padding:1px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal .d .chip.x{outline:2px solid var(--amber);outline-offset:-2px}
+.legenda{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-top:12px}
+.legenda span{display:inline-flex;align-items:center;gap:6px}
+.legenda i{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+/* ---------- Holerite ---------- */
+.holerite{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);margin-bottom:12px;overflow:hidden}
+.holerite .topo{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer}
+.holerite .topo .nome{flex:1;min-width:0}
+.holerite .topo .nome b{display:block}
+.holerite .topo .liq{text-align:right}
+.holerite .topo .liq .money{font-size:24px}
+.holerite .corpo{display:none;border-top:1px solid var(--line);padding:18px;grid-template-columns:1.2fr 1fr;gap:28px}
+.holerite.aberto .corpo{display:grid}
+.ln{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.ln:last-child{border-bottom:0}
+.ln.tot{border-top:2px solid var(--ink);border-bottom:0;margin-top:6px;padding-top:10px;font-weight:700}
+.ln.tot .money{font-size:20px}
+.bloco-t{font-size:13px;font-weight:700;color:var(--ink2);margin:14px 0 4px}
+.bloco-t:first-child{margin-top:0}
+.ajustes{background:var(--paper);border-radius:var(--r-m);padding:14px}
+
+/* ---------- Importação ---------- */
+.prev td{padding:4px 4px}
+.prev .inp{padding:6px 7px;font-size:13px;border-radius:6px;min-width:0}
+.prev tr.dup td{background:var(--amberbg)}
+.prev tr.off td{opacity:.45}
+.fotoprev{max-width:100%;max-height:260px;border-radius:var(--r-m);border:1px solid var(--line);display:block;margin-top:8px}
+.fotogrande{width:100%;border-radius:var(--r-m)}
+.anx{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-m);margin-top:6px;font-size:14px}
+.anx .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.anx .muted{font-size:12px;white-space:nowrap}
+.icon-btn small{font-size:11px;font-weight:700;margin-left:1px}
+.benrow{display:grid;grid-template-columns:1fr 1fr 1.3fr 1.3fr 32px;gap:8px;align-items:end;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.benrow label:first-child{grid-column:1/-1}
+.benrow .inp{min-width:0}
+.benrow span{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:4px}
+.benrow .inp{padding:8px 9px;font-size:14px}
+
+/* ---------- Modal ---------- */
+#modal{position:fixed;inset:0;background:rgba(23,36,47,.45);display:none;align-items:flex-start;justify-content:center;z-index:60;padding:48px 16px;overflow:auto}
+#modal.on{display:flex}
+#modal .box{background:var(--surface);border-radius:var(--r-l);width:100%;max-width:520px;padding:24px;box-shadow:0 20px 50px rgba(23,36,47,.25)}
+#modal h2{font-size:19px}
+#modal .desc{color:var(--ink2);margin:6px 0 4px}
+#modal .acoes{display:flex;justify-content:flex-end;gap:8px;margin-top:22px;flex-wrap:wrap}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px}
+.fg .full,.fg3 .full{grid-column:1/-1}
+.ajuda{font-size:12px;color:var(--ink3);margin-top:4px}
+.toggle{display:flex;gap:10px;align-items:center;margin-top:16px;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--acc)}
+.chk{width:18px;height:18px;accent-color:var(--amber);cursor:pointer}
+.seg{display:inline-flex;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-m);padding:3px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:7px 12px;border-radius:7px;font-weight:600;color:var(--ink2);cursor:pointer}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(23,36,47,.12)}
+
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:var(--r-m);font-weight:600;opacity:0;transition:.2s;z-index:80;pointer-events:none;max-width:90vw}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{background:var(--wine)}
+#carregando{position:fixed;inset:0;background:var(--paper);display:none;align-items:center;justify-content:center;z-index:90;flex-direction:column;gap:12px;color:var(--ink2)}
+#carregando i{width:28px;height:28px;border:3px solid var(--line2);border-top-color:var(--acc);border-radius:50%;animation:gira .7s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+#sync{font-size:12px;color:rgba(255,255,255,.55);margin-top:6px}
+
+/* ---------- Celular ---------- */
+#tabbar{display:none}
+#offbar{display:none;position:sticky;top:0;z-index:40;margin-left:var(--side);padding:10px 16px;background:var(--amberbg);color:#5d3d09;font-size:14px;font-weight:600;line-height:1.4;border-bottom:1px solid #ecd9b0}
+#offbar.on{display:block}
+#offbar.env{background:var(--accbg);color:#123c52;border-color:#cfe3d2}
+#mais{display:none}
+@media (max-width:900px){
+  #side{display:none}
+  main{margin-left:0;padding:20px 16px 110px}
+  #offbar{margin-left:0;padding-top:calc(10px + env(safe-area-inset-top))}
+  .head h1{font-size:22px}
+  .faixa{grid-template-columns:1fr 1fr}
+  .faixa>div:nth-child(3){border-left:0}
+  .faixa>div:nth-child(n+3){border-top:1px solid var(--line)}
+  .faixa .v{font-size:22px}
+  .grid2{grid-template-columns:1fr}
+  #tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:30}
+  #tabbar button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;color:var(--ink3);padding:6px 0;cursor:pointer}
+  #tabbar button.on{color:var(--acc)}
+  #tabbar button.lancar{color:#fff}
+  #tabbar button.lancar span.bolha{background:var(--acc);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;margin-top:-18px;box-shadow:0 4px 12px rgba(47,107,58,.35)}
+  #tabbar button.lancar span.t{color:var(--acc)}
+  #mais.on{display:block;position:fixed;inset:0;background:rgba(23,36,47,.4);z-index:40}
+  #mais .sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:var(--r-l) var(--r-l) 0 0;padding:12px 12px calc(24px + env(safe-area-inset-bottom))}
+  #mais .sheet button{display:flex;gap:12px;align-items:center;width:100%;background:none;border:0;padding:14px 12px;font-weight:600;text-align:left;border-radius:var(--r-m);cursor:pointer}
+  #mais .sheet button:hover{background:var(--paper)}
+  .mesnav .lbl{min-width:0;font-size:14px}
+  .holerite .corpo{grid-template-columns:1fr}
+  .holerite .topo .liq .money{font-size:20px}
+  .cal{gap:2px}
+  .cal .d{min-height:54px;padding:4px}
+  .cal .d .chips{flex-direction:row;flex-wrap:wrap;gap:2px}
+  .cal .d .chip{font-size:0;width:8px;height:8px;padding:0;border-radius:50%}
+  #login{grid-template-columns:1fr}
+  #login .art{padding:32px 24px;min-height:auto}
+  #login .art .marca{font-size:32px}
+  #login .art p{display:none}
+  .fg,.fg3{grid-template-columns:1fr 1fr}
+  td.hide-m,th.hide-m,.hide-m{display:none}
+  td.act .icon-btn{padding:4px}
+  .nf{display:none} .nc{display:inline} td.nc{display:table-cell} .mob{display:block} .tag.nc{display:inline-block}
+  #modal{padding:16px 8px}
+  .benrow{grid-template-columns:1fr 1fr}
+  .benrow .icon-btn{grid-column:1/-1;justify-self:end}
+  #modal .box{padding:18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{#side,#tabbar,#offbar,.tools,.btn{display:none!important}main{margin:0;padding:0}}
+.brinco{display:inline-block;font-size:11px;font-weight:700;background:#F4D35E;color:#3b3000;border-radius:4px;padding:0 5px;margin-left:4px;vertical-align:middle;letter-spacing:.03em}
+.brinco.grande{font-size:15px;padding:1px 8px}
+.fotoanimal{max-width:100%;max-height:320px;border-radius:var(--r-m);display:block;margin:auto}
+.chips-sel{display:flex;flex-wrap:wrap;gap:6px;max-height:220px;overflow:auto;padding:2px}
+.chip-sel{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:20px;padding:5px 10px;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface)}
+.chip-sel.on{background:var(--accbg);border-color:var(--acc);color:var(--acc)}
+.chip-sel input{display:none}
+.chip-sel small{color:var(--ink3);font-weight:600}
+.ln .link{font-weight:600}
+.aviso.perigo{background:var(--winebg);color:#6d1d27}
+
+</style>
+</head>
+<body>
+
+<div id="carregando"><i></i><span id="carregandoMsg">Carregando dados…</span></div>
+
+<!-- ======================= LOGIN ======================= -->
+<section id="login">
+  <div class="art">
+    <div class="marca">Roça<small>Rebanho e leite</small></div>
+    <p>Vacas, partos, inseminações, remédios, controle leiteiro, folha do leite e caixa em um só lugar. Funciona no celular, direto no curral.</p>
+  </div>
+  <form onsubmit="event.preventDefault();entrar()">
+    <h1>Entrar</h1>
+    <div class="muted">Use o e-mail e a senha da sua conta.</div>
+    <label class="field"><span>E-mail</span><input class="inp" id="lgEmail" type="email" autocomplete="username" required></label>
+    <label class="field"><span>Senha</span><input class="inp" id="lgSenha" type="password" autocomplete="current-password" required></label>
+    <button class="btn block" style="margin-top:20px" id="lgBtn">Entrar</button>
+    <div class="msg" id="lgMsg"></div>
+    <button type="button" class="link" onclick="esqueciSenha()">Esqueci a senha</button>
+  </form>
+</section>
+
+<!-- ======================= APP ======================= -->
+<div id="app">
+  <aside id="side">
+    <div class="marca">Roça<small>Rebanho e leite</small></div>
+    <nav id="nav"></nav>
+    <div class="conta"><div id="contaEmail"></div><div id="sync">Tudo salvo</div><button onclick="sair()">Sair</button></div>
+  </aside>
+  <div id="offbar" role="status"></div>
+  <main id="main"></main>
+  <nav id="tabbar"></nav>
+  <div id="mais" onclick="if(event.target.id==='mais')fecharMais()"><div class="sheet" id="maisSheet"></div></div>
+</div>
+
+<div id="modal" onclick="if(event.target.id==='modal')fecharModal()"><div class="box" id="mbox" role="dialog" aria-modal="true"></div></div>
+<div id="toast" role="status"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* =====================================================================
+   Roça · Gestão do rebanho e do leite
+   Dados no Firestore:
+     dados/geral          → parceiros, sêmen/touros, folhas do leite, fluxo de caixa, configurações
+     animais/{id}         → um animal por documento
+     eventos/{id}         → inseminação, cobertura, diagnóstico, parto, secagem, observação
+     tratamentos/{id}     → remédio/vacina: produto, vacas, dose, carência, valor
+     pesagens/{id}        → um dia de controle leiteiro / boost (litros de cada vaca)
+     fotos, anexos, anexos_partes → fotos e documentos
+   ===================================================================== */
+const FIREBASE_CONFIG = {apiKey:"AIzaSyC33EseR0ytmBRjHFxuKhSlLPeLApz_h1A",authDomain:"fazenda-buritis.firebaseapp.com",projectId:"fazenda-buritis",storageBucket:"fazenda-buritis.firebasestorage.app",messagingSenderId:"124906795977",appId:"1:124906795977:web:81e0a9bb8af11e4c15ae18"};
+const BACKUP_LOCAL = 'roca_v1';
+const CATEGORIAS = {
+  lactacao:{nome:'Vaca em lactação', curto:'Lactação', tag:'t-ok', femea:true, vaca:true},
+  seca:{nome:'Vaca seca', curto:'Seca', tag:'t-warn', femea:true, vaca:true},
+  novilha:{nome:'Novilha', curto:'Novilha', tag:'t-acc', femea:true},
+  bezerra:{nome:'Bezerra', curto:'Bezerra', tag:'t-mut', femea:true},
+  bezerro:{nome:'Bezerro', curto:'Bezerro', tag:'t-mut'},
+  touro:{nome:'Touro', curto:'Touro', tag:'t-acc'},
+  boi:{nome:'Boi / garrote', curto:'Boi', tag:'t-mut'}
+};
+const SITUACOES = {ativa:'No rebanho', vendida:'Vendida', morta:'Morreu', descarte:'Descarte'};
+
+let cad = { parceiros:[], semens:[], folhas:{}, caixa:{saldos:{}, lancs:[]}, config:{} };
+let animais=[], eventos=[], tratamentos=[], pesagens=[];
+let db=null, auth=null, cadRef=null, unsubs=[];
+let salvando=null, pendente=false;
+
+/* ============================ UTILIDADES ============================ */
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,'0');
+const iso = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const hoje = () => iso(new Date());
+const br = s => s ? s.split('-').reverse().join('/') : '—';
+const brCurto = s => s ? s.slice(8,10)+'/'+s.slice(5,7) : '—';
+const mesAtual = () => hoje().slice(0,7);
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const DIAS = ['dom','seg','ter','qua','qui','sex','sáb'];
+const mesNome = ym => { const [y,m]=ym.split('-'); return MESES[+m-1]+' de '+y; };
+const mesNomeCap = ym => { const s=mesNome(ym); return s[0].toUpperCase()+s.slice(1); };
+const somaMes = (ym,n) => { const [y,m]=ym.split('-').map(Number); const d=new Date(y,m-1+n,1); return d.getFullYear()+'-'+pad(d.getMonth()+1); };
+const somaDias = (ds,n) => { const d=new Date(ds+'T12:00'); d.setDate(d.getDate()+n); return iso(d); };
+const difDias = (a,b) => Math.round((new Date(a+'T12:00')-new Date(b+'T12:00'))/86400000);
+const BRL = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
+const brl = v => BRL.format(Number(v)||0);
+const inteiro = v => (Number(v)||0).toLocaleString('pt-BR');
+const dec1 = v => (Number(v)||0).toLocaleString('pt-BR',{maximumFractionDigits:1});
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function tempo(o){
+  if(!o) return 0; if(o.criado) return o.criado;
+  const ref=o.tratId||o.id||''; const t=parseInt(String(ref).slice(0,8),36);
+  return t>1.6e12&&t<2.2e12 ? t : 0;
+}
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const soma = (a,f) => a.reduce((t,x)=>t+(Number(f(x))||0),0);
+const r2 = v => Math.round((Number(v)||0)*100)/100;
+function num(v){
+  if (typeof v==='number') return v;
+  v=String(v??'').trim().replace(/[R$\s]/g,'');
+  if (!v) return 0;
+  if (v.includes(',')) v=v.replace(/\./g,'').replace(',','.');
+  else if (/^-?\d{1,3}(\.\d{3})+$/.test(v)) v=v.replace(/\./g,'');
+  const n=parseFloat(v); return isNaN(n)?0:Math.round(n*10000)/10000;
+}
+const int = v => { const s=String(v??'').replace(/\D/g,''); return s?parseInt(s,10):0; };
+const fmtInp = v => (v===''||v==null||num(v)===0) ? '' : num(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtPreco = v => (v===''||v==null||num(v)===0) ? '' : num(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:4});
+const fmtLitros = v => (v===''||v==null||num(v)===0) ? '' : num(v).toLocaleString('pt-BR',{maximumFractionDigits:1});
+const noMes = (d,ym) => String(d||'').startsWith(ym);
+const refTxtCurto = ym => `${MESES[+ym.slice(5)-1].slice(0,3)}/${ym.slice(2,4)}`;
+function toast(msg, erro){ const t=$('toast'); t.textContent=msg; t.className='on'+(erro?' err':''); clearTimeout(toast.h); toast.h=setTimeout(()=>t.className='',3000); }
+function cfg(){ const c=cad.config||{}; return {gestacao:int(c.gestacao)||283, secagem:int(c.secagem)||60, diagDias:int(c.diagDias)||35, boostDias:int(c.boostDias)||14}; }
+
+/* ---------- animais ---------- */
+const ani = id => animais.find(a=>a.id===id);
+const nomeAnimal = id => { const a=ani(id); if(!a) return '(animal apagado)'; return a.nome||('Brinco '+a.brinco); };
+const rotulo = a => a ? `${esc(a.nome||'Sem nome')}${a.brinco?` <span class="brinco">${esc(a.brinco)}</span>`:''}` : '—';
+const animalTag = id => { const a=ani(id); return a?`<span class="tag t-mut" style="cursor:pointer" onclick="event.stopPropagation();abrirAnimal('${a.id}')">${esc(a.nome||a.brinco)}${a.nome&&a.brinco?' · '+esc(a.brinco):''}</span>`:''; };
+const ativo = a => (a.situacao||'ativa')==='ativa';
+const femea = a => (CATEGORIAS[a.categoria]||{}).femea || a.sexo==='F';
+const ehVaca = a => (CATEGORIAS[a.categoria]||{}).vaca;
+const parc = id => cad.parceiros.find(p=>p.id===id) || {id, nome:'(parceiro apagado)', preco:0};
+function idadeTxt(nasc){
+  if(!nasc) return '';
+  const m=Math.floor(difDias(hoje(),nasc)/30.44); if(m<0) return '';
+  if(m<24) return m+(m===1?' mês':' meses');
+  const a=Math.floor(m/12), r=m%12; return a+' anos'+(r?' e '+r+(r===1?' mês':' meses'):'');
+}
+function paiTxt(a){
+  if(!a) return '—';
+  if(a.paiId){ const p=ani(a.paiId); return p?esc(p.nome||p.brinco):'(touro apagado)'; }
+  return a.paiNome?esc(a.paiNome):'—';
+}
+const ordAnimal = (a,b) => (a.nome||'').localeCompare(b.nome||'','pt',{sensitivity:'base'}) || String(a.brinco||'').localeCompare(String(b.brinco||''),'pt',{numeric:true});
+const optsAnimais = (sel, filtro, todos) => (todos?`<option value="">${todos}</option>`:'')+animais.filter(a=>(ativo(a)&&(!filtro||filtro(a)))||a.id===sel).sort(ordAnimal).map(a=>`<option value="${a.id}" ${a.id===sel?'selected':''}>${esc(a.nome||'Sem nome')}${a.brinco?' · '+esc(a.brinco):''}</option>`).join('');
+const optsParceiros = sel => cad.parceiros.filter(p=>p.ativo!==false||p.id===sel).map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.nome)}</option>`).join('');
+const optsCategoria = sel => Object.entries(CATEGORIAS).map(([k,c])=>`<option value="${k}" ${k===sel?'selected':''}>${c.nome}</option>`).join('');
+
+/* ============================ REPRODUÇÃO ============================
+   Para cada fêmea: último parto → serviços (inseminação/cobertura) depois dele
+   → último diagnóstico depois do último serviço.
+   Previsão do parto = data do último serviço + gestação (padrão 283 dias),
+   ou a data prevista informada no diagnóstico. Secar = previsão − 60 dias.
+   =================================================================== */
+const evDe = id => eventos.filter(e=>e.animalId===id).sort((a,b)=>a.data.localeCompare(b.data)||tempo(a)-tempo(b));
+function statusRepro(a){
+  const c=cfg(), evs=evDe(a.id);
+  const partos=evs.filter(e=>e.tipo==='parto'), ultParto=partos[partos.length-1];
+  const desde=ultParto?ultParto.data:'';
+  const serv=evs.filter(e=>(e.tipo==='ia'||e.tipo==='cobertura')&&e.data>=desde&&(!ultParto||e.data>ultParto.data||tempo(e)>tempo(ultParto)));
+  const ultServ=serv[serv.length-1];
+  const diag=ultServ?evs.filter(e=>e.tipo==='diagnostico'&&e.data>=ultServ.data).pop():null;
+  const secagem=ultParto?evs.filter(e=>e.tipo==='secagem'&&e.data>=ultParto.data).pop():evs.filter(e=>e.tipo==='secagem').pop();
+  const r={ultParto, ultServ, servicos:serv.length, diag, secagem, partos:partos.length};
+  if(!ultServ){ r.status=ultParto?'parida':'sem'; r.diasParida=ultParto?difDias(hoje(),ultParto.data):null; return r; }
+  if(diag&&diag.resultado==='vazia'){ r.status='vazia'; return r; }
+  r.status=diag?'prenha':'inseminada';
+  r.previsao=(diag&&diag.previsao)||somaDias(ultServ.data,c.gestacao);
+  r.secar=somaDias(r.previsao,-c.secagem);
+  r.diasServ=difDias(hoje(),ultServ.data);
+  r.pai=ultServ.paiId?nomeAnimal(ultServ.paiId):(ultServ.paiNome||'');
+  r.tipoServ=ultServ.tipo;
+  return r;
+}
+const STATUS_TXT = {sem:'Sem inseminação', parida:'Parida (sem inseminação)', vazia:'Vazia', inseminada:'Inseminada · aguardando diagnóstico', prenha:'Prenha'};
+const STATUS_TAG = {sem:'t-mut', parida:'t-acc', vazia:'t-bad', inseminada:'t-warn', prenha:'t-ok'};
+
+/* ---------- carência de leite ---------- */
+function carenciasAtivas(dataRef){
+  const d=dataRef||hoje(), out=[];
+  tratamentos.forEach(t=>{ const n=int(t.carencia); if(!n) return; const fim=somaDias(t.data,n); if(fim>=d && t.data<=d) (t.vacas||[]).forEach(v=>out.push({animalId:v, fim, produto:t.produto, tratId:t.id})); });
+  const porVaca={}; out.forEach(c=>{ if(!porVaca[c.animalId]||porVaca[c.animalId].fim<c.fim) porVaca[c.animalId]=c; });
+  return Object.values(porVaca).sort((a,b)=>a.fim.localeCompare(b.fim));
+}
+
+/* ============================ FOLHA DO LEITE ============================
+   recebido do laticínio = valor bruto − descontos da folha (ração, adiantamento…)
+   repasse de cada parceiro = litros do parceiro × preço que vocês decidiram
+   líquido do pai = valor bruto − descontos − repasses
+   ======================================================================= */
+function calcFolha(ref){
+  const f=cad.folhas[ref]; if(!f) return null;
+  const litros=num(f.litros), preco=num(f.preco), bruto=num(f.bruto)||r2(litros*preco);
+  const parceiros=(f.parceiros||[]).map(x=>({...x, litros:num(x.litros), preco:num(x.preco), valor:r2(num(x.litros)*num(x.preco))}));
+  const descontos=(f.descontos||[]).map(d=>({...d, valor:num(d.valor)}));
+  const totDesc=r2(soma(descontos,d=>d.valor)), totRep=r2(soma(parceiros,x=>x.valor)), litrosParc=soma(parceiros,x=>x.litros);
+  return {ref, ...f, litros, preco, bruto, parceiros, descontos, totDesc, totRep, litrosParc, litrosPai:r2(litros-litrosParc),
+    recebido:r2(bruto-totDesc), liquidoPai:r2(bruto-totDesc-totRep), precoMedio:litros?bruto/litros:0};
+}
+
+const I = {
+  inicio:'<svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
+  lancar:'<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  viagens:'<svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  importar:'<svg class="i" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg>',
+  motoristas:'<svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14.5c2.2.3 3.8 1.9 4.5 4.5"/></svg>',
+  fechamento:'<svg class="i" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
+  manutencao:'<svg class="i" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>',
+  caminhoes:'<svg class="i" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>',
+  caixa:'<svg class="i" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 12.5h2M3 10h18"/></svg>',
+  clip:'<svg class="i" viewBox="0 0 24 24"><path d="M20 11.5l-8.2 8.2a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.4 8.4a1.7 1.7 0 0 1-2.4-2.4l7.7-7.7"/></svg>',
+  conta:'<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>',
+  mais:'<svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>',
+  esq:'<svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>',
+  dir:'<svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+  editar:'<svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>',
+  lixo:'<svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+  pdf:'<svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+  foto:'<svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>',
+  x:'<svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+,
+  vaca:'<svg class="i" viewBox="0 0 24 24"><path d="M5 8c-1.5-.5-2.5-2-2-3.5 1.5.3 2.6 1 3 2M19 8c1.5-.5 2.5-2 2-3.5-1.5.3-2.6 1-3 2"/><path d="M6 7.5C7 6 9.3 5 12 5s5 1 6 2.5c.8 1.3.5 3.5-.5 5.5l-.8 4.5A3 3 0 0 1 13.8 20h-3.6a3 3 0 0 1-2.9-2.5L6.5 13C5.5 11 5.2 8.8 6 7.5z"/><circle cx="10" cy="16.5" r=".6"/><circle cx="14" cy="16.5" r=".6"/><path d="M9.5 10.5h.01M14.5 10.5h.01"/></svg>',
+  repro:'<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M12 14v7M9 18h6"/></svg>',
+  gota:'<svg class="i" viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>',
+  remedio:'<svg class="i" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-45 12 12)"/><path d="M9.5 9.5l5 5"/></svg>'
+};
+
+/* ============================ DADOS ============================ */
+function normalizar(s){
+  s=s||{};
+  s.parceiros=s.parceiros||[]; s.semens=s.semens||[]; s.folhas=s.folhas||{}; s.config=s.config||{};
+  s.caixa=s.caixa||{}; s.caixa.saldos=s.caixa.saldos||{}; s.caixa.lancs=s.caixa.lancs||[];
+  return s;
+}
+function statusSync(t){ const el=$('sync'); if(el) el.textContent=t; }
+function lerBackup(){ try{ return JSON.parse(localStorage.getItem(BACKUP_LOCAL)||'null'); }catch(e){ return null; } }
+function guardarLocal(){ try{ localStorage.setItem(BACKUP_LOCAL, JSON.stringify({cad, animais, eventos, tratamentos, pesagens})); }catch(e){} }
+function salvar(){
+  guardarLocal(); pendente=true; statusSync('Salvando…');
+  clearTimeout(salvando);
+  salvando=setTimeout(enviarCad,400);
+}
+function enviarCad(){
+  clearTimeout(salvando); salvando=null;
+  if(!pendente || !cadRef) return;
+  pendente=false; acompanhar(()=>cadRef.set(JSON.parse(JSON.stringify(cad))));
+}
+
+/* ============================ SEM INTERNET ============================
+   O Firestore guarda no próprio celular (IndexedDB) tudo o que é lançado
+   e manda sozinho para a nuvem quando o sinal volta. Por isso as gravações
+   NÃO esperam a resposta do servidor: sem sinal ela só chega depois.
+   O sw.js guarda a página e as bibliotecas para o sistema abrir sem internet.
+   ===================================================================== */
+const PEND_LOCAL='roca_pend';
+let fila=0, filaDesde=0, aguardando=false, ficouOffline=false, persistente=false, esperandoNuvem=false;
+try{ aguardando=localStorage.getItem(PEND_LOCAL)==='1'; ficouOffline=aguardando; }catch(e){}
+const online = () => navigator.onLine!==false;
+function acompanhar(fazer){
+  let p; try{ p=Promise.resolve(fazer()); }catch(e){ p=Promise.reject(e); }
+  if(!fila) filaDesde=Date.now();
+  fila++; marcarAguardando(); atualizarRede(); setTimeout(atualizarRede,6500);
+  p.then(()=>{ fila--; atualizarRede(); }, e=>{ fila--; console.error(e); erroSalvar(e); atualizarRede(); });
+  return p;
+}
+function marcarAguardando(){
+  aguardando=true; try{ localStorage.setItem(PEND_LOCAL,'1'); }catch(e){}
+  if(esperandoNuvem || !db || !db.waitForPendingWrites) return;
+  esperandoNuvem=true;
+  db.waitForPendingWrites().then(()=>{
+    esperandoNuvem=false;
+    if(fila>0){ marcarAguardando(); return; }
+    aguardando=false; try{ localStorage.removeItem(PEND_LOCAL); }catch(e){}
+    if(ficouOffline){ ficouOffline=false; toast('Sinal voltou: tudo foi enviado para a nuvem.'); }
+    atualizarRede();
+  }, e=>{ esperandoNuvem=false; console.warn(e); });
+}
+function atualizarRede(){
+  const off=!online(); if(off) ficouOffline=true;
+  const lento=fila>0 && Date.now()-filaDesde>6000;
+  let txt='', cls='';
+  if(off){ txt='Sem internet. Pode lançar normalmente: fica guardado no celular e vai para a nuvem quando o sinal voltar.'; cls='on'; }
+  else if(aguardando && (ficouOffline||lento)){ txt=ficouOffline?'Sinal voltou. Enviando o que foi lançado sem internet…':'Sinal fraco. O que você lançou está guardado no celular e vai ser enviado assim que der.'; cls='on env'; }
+  const b=$('offbar'); if(b){ b.textContent=txt; b.className=cls; }
+  statusSync(off?'Sem internet · guardado no celular':(aguardando||pendente)?'Salvando…':'Tudo salvo');
+}
+window.addEventListener('online',atualizarRede);
+window.addEventListener('offline',atualizarRede);
+/* celular pode fechar a aba a qualquer hora: manda logo o que está esperando os 400 ms */
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') enviarCad(); });
+window.addEventListener('pagehide',enviarCad);
+function erroSalvar(e){ toast(e&&e.code==='permission-denied' ? 'Sem permissão para salvar. Saia e entre de novo.' : 'Não foi possível salvar. Verifique a internet.', true); }
+async function gravar(colecao, obj){
+  const o=JSON.parse(JSON.stringify(obj)); const id=o.id||uid(); delete o.id;
+  acompanhar(()=>db.collection(colecao).doc(id).set(o));
+  return id;
+}
+async function apagarDoc(colecao, id){
+  acompanhar(()=>db.collection(colecao).doc(id).delete());
+}
+function escutar(){
+  $('carregando').style.display='flex';
+  const chegou={}, FONTES=5;
+  const pronto=fonte=>{
+    if(Object.keys(chegou).length===FONTES){ redesenhar(); return; }
+    chegou[fonte]=1;
+    if(Object.keys(chegou).length===FONTES){ $('carregando').style.display='none'; render(); }
+  };
+  const erro=err=>{ console.error(err); $('carregando').style.display='none';
+    toast(err.code==='permission-denied'?'Esta conta não tem acesso aos dados.':'Erro ao carregar os dados.', true); };
+  const copia=lerBackup(), doCelular=snap=>snap.metadata&&snap.metadata.fromCache;
+  unsubs.push(cadRef.onSnapshot(snap=>{
+    if(chegou.cad && (pendente || snap.metadata.hasPendingWrites)) return;
+    let d=snap.exists?snap.data():null;
+    if(!d && doCelular(snap) && copia && copia.cad) d=copia.cad;  // sem sinal e sem cache: usa a cópia do celular
+    cad=normalizar(d||{});
+    guardarLocal(); pronto('cad');
+  }, erro));
+  const col=(nome,set)=>db.collection(nome).onSnapshot(snap=>{
+    let l=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(!l.length && doCelular(snap) && copia && (copia[nome]||[]).length) l=copia[nome];
+    set(l); guardarLocal(); pronto(nome);
+  }, erro);
+  /* sem sinal o Firestore pode demorar para responder: depois de 6 s abre com a cópia do celular */
+  setTimeout(()=>{
+    if(Object.keys(chegou).length===FONTES) return;
+    if(!copia || !copia.cad){ if(!online()) $('carregandoMsg').textContent='Sem internet e sem dados guardados neste celular. Abra o sistema uma vez com sinal.'; return; }
+    if(!chegou.cad) cad=normalizar(copia.cad);
+    if(!chegou.animais) animais=copia.animais||[];
+    if(!chegou.eventos) eventos=copia.eventos||[];
+    if(!chegou.tratamentos) tratamentos=copia.tratamentos||[];
+    if(!chegou.pesagens) pesagens=copia.pesagens||[];
+    ['cad','animais','eventos','tratamentos','pesagens'].forEach(f=>chegou[f]=1);
+    $('carregando').style.display='none'; render(); atualizarRede();
+  },6000);
+  unsubs.push(col('animais', a=>animais=a));
+  unsubs.push(col('eventos', a=>eventos=a));
+  unsubs.push(col('tratamentos', a=>tratamentos=a));
+  unsubs.push(col('pesagens', a=>pesagens=a));
+}
+function redesenhar(){ if(!$('modal').classList.contains('on') && !digitando()) render(); }
+function digitando(){ const a=document.activeElement; return a && $('main').contains(a) && /INPUT|TEXTAREA|SELECT/.test(a.tagName); }
+
+/* ============================ NAVEGAÇÃO ============================ */
+const PAGS = [
+  {id:'inicio', nome:'Início', i:'inicio'},
+  {id:'rebanho', nome:'Rebanho', i:'vaca'},
+  {id:'reproducao', nome:'Reprodução e partos', i:'repro'},
+  {id:'leite', nome:'Controle leiteiro e boost', i:'gota'},
+  {id:'saude', nome:'Remédios e vacinas', i:'remedio'},
+  {id:'folha', nome:'Folha do leite', i:'fechamento'},
+  {id:'caixa', nome:'Fluxo de caixa', i:'caixa'},
+  {g:'Cadastros'},
+  {id:'cadastros', nome:'Parceiros e sêmen', i:'motoristas'},
+  {id:'conta', nome:'Minha conta', i:'conta'}
+];
+const MAIS_IDS=['reproducao','saude','caixa','cadastros','conta'];
+let pag='inicio';
+const V = { mes: mesAtual(), animalId:null, busca:'', fCat:'ativos', fSit:'ativa' };
+function ir(p, opts){ pag=p; if(opts) Object.assign(V,opts); fecharMais(); history.replaceState(null,'','#'+p); window.scrollTo(0,0); render(); }
+function render(){
+  const atual=pag==='animal'?'rebanho':pag;
+  $('nav').innerHTML = PAGS.map(p=>p.g?`<div class="grp">${p.g}</div>`:`<button class="${atual===p.id?'on':''}" onclick="ir('${p.id}')">${I[p.i]}${p.nome}</button>`).join('');
+  const tab=[['inicio','Início','inicio'],['rebanho','Rebanho','vaca'],['lancar','Lançar','lancar'],['folha','Leite','gota'],['mais','Mais','mais']];
+  $('tabbar').innerHTML = tab.map(([id,n,ic])=>{
+    if(id==='lancar') return `<button class="lancar" onclick="abrirLancar()"><span class="bolha">${I.lancar}</span><span class="t">${n}</span></button>`;
+    if(id==='mais') return `<button class="${MAIS_IDS.includes(atual)||atual==='leite'?'on':''}" onclick="abrirMais()">${I.mais}${n}</button>`;
+    return `<button class="${atual===id?'on':''}" onclick="ir('${id}')">${I[ic]}${n}</button>`;
+  }).join('');
+  $('main').innerHTML = (R[pag]||R.inicio)();
+  if(pag==='animal') carregarFotosAnimal();
+}
+function sheet(itens){ $('maisSheet').innerHTML=itens.map(([fn,ic,n])=>`<button onclick="fecharMais();${fn}">${I[ic]}${n}</button>`).join(''); $('mais').classList.add('on'); }
+function abrirMais(){ sheet([["ir('leite')",'gota','Controle leiteiro e boost'],...MAIS_IDS.map(id=>{const p=PAGS.find(x=>x.id===id);return [`ir('${id}')`,p.i,p.nome];}),['sair()','x','Sair']]); }
+function abrirLancar(){ sheet([["formPesagem()",'gota','Dia do boost / pesar leite'],["formServico()",'repro','Inseminação ou cobertura'],["formDiagnostico()",'repro','Diagnóstico de prenhez'],["formParto()",'vaca','Parto'],["formTratamento()",'remedio','Remédio ou vacina'],["formAnimal()",'vaca','Novo animal'],["formCaixa()",'caixa','Lançamento no caixa']]); }
+function fecharMais(){ $('mais').classList.remove('on'); }
+
+/* ============================ MODAL ============================ */
+let MODAL=null;
+function abrirModal({titulo, desc='', corpo='', ok='Salvar', cancelar='Cancelar', perigo=false, aoConfirmar, larg, extra='', extraFim=''}){
+  MODAL={aoConfirmar};
+  $('mbox').style.maxWidth=larg||'520px';
+  $('mbox').innerHTML=`<h2>${titulo}</h2>${desc?`<p class="desc">${desc}</p>`:''}<form id="mform" onsubmit="event.preventDefault();confirmarModal()">${corpo}<div class="acoes">${extra}${extraFim}${cancelar?`<button type="button" class="btn sec" onclick="fecharModal()">${cancelar}</button>`:''}${ok?`<button class="btn ${perigo?'danger':''}" id="mok">${ok}</button>`:''}</div></form>`;
+  $('modal').classList.add('on');
+  if($('anxLista')) desenharAnexos(); else ANX=null;
+  setTimeout(()=>{ const f=$('mform')&&$('mform').querySelector('input:not([type=checkbox]):not([type=file]),select,textarea'); if(f && window.innerWidth>900 && !$('mbox').contains(document.activeElement)) f.focus(); },30);
+}
+async function confirmarModal(){ if(!MODAL) return; const b=$('mok'); if(b) b.disabled=true; let r; try{ r=await MODAL.aoConfirmar?.($('mform')); }catch(e){ r=false; } if(b) b.disabled=false; if(r===false) return; fecharModal(); }
+function fecharModal(){ $('modal').classList.remove('on'); MODAL=null; render(); }
+function confirmar(titulo, desc, ok, fn){ abrirModal({titulo, desc, ok, perigo:true, aoConfirmar:fn}); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if($('modal').classList.contains('on')) fecharModal(); fecharMais(); } });
+
+
+const R = {};
+function seletorMes(){ return `<div class="mesnav"><button class="icon-btn" onclick="V.mes=somaMes(V.mes,-1);render()" aria-label="Mês anterior">${I.esq}</button><span class="lbl">${mesNomeCap(V.mes)}</span><button class="icon-btn" onclick="V.mes=somaMes(V.mes,1);render()" aria-label="Próximo mês">${I.dir}</button></div>`; }
+const linkAnimal = id => { const a=ani(id); return a?`<button class="link" onclick="abrirAnimal('${a.id}')">${rotulo(a)}</button>`:'<span class="muted">—</span>'; };
+
+/* ============================ INÍCIO ============================ */
+R.inicio = () => {
+  const at=animais.filter(ativo), c=cfg(), h=hoje();
+  const vacas=at.filter(ehVaca), lact=at.filter(a=>a.categoria==='lactacao');
+  const st=at.filter(femea).map(a=>({a, s:statusRepro(a)}));
+  const partos=st.filter(x=>x.s.previsao).sort((x,y)=>x.s.previsao.localeCompare(y.s.previsao));
+  const prox90=partos.filter(x=>x.s.previsao<=somaDias(h,90));
+  const secar=st.filter(x=>x.s.secar&&x.a.categoria==='lactacao'&&x.s.secar<=somaDias(h,30));
+  const semDiag=st.filter(x=>x.s.status==='inseminada'&&x.s.diasServ>=c.diagDias);
+  const car=carenciasAtivas();
+  const ultPes=[...pesagens].sort((a,b)=>b.data.localeCompare(a.data))[0];
+  const ultBoost=[...pesagens].filter(p=>(p.itens||[]).some(i=>i.boost)).sort((a,b)=>b.data.localeCompare(a.data))[0];
+  const proxBoost=ultBoost?somaDias(ultBoost.data,c.boostDias):null;
+  const f=calcFolha(somaMes(mesAtual(),-1));
+  const cx=caixaMes(mesAtual());
+  const cont=Object.keys(CATEGORIAS).map(k=>[k,at.filter(a=>a.categoria===k).length]).filter(x=>x[1]);
+  const alerta=(cls,t,txt,btn)=>`<div class="aviso ${cls}"><div><b>${t}</b>${txt}${btn?` ${btn}`:''}</div></div>`;
+  return `
+  <div class="head"><div><h1>Início</h1><p>Como está o rebanho hoje e o que precisa de atenção.</p></div></div>
+  ${car.length?alerta('perigo','Leite em carência — não mandar para o tanque', car.map(x=>`${esc(nomeAnimal(x.animalId))} até ${brCurto(x.fim)} (${esc(x.produto)})`).join(' · '))+'':''}
+  ${prox90.filter(x=>x.s.previsao<=somaDias(h,15)).length?alerta('info','Parto chegando', prox90.filter(x=>x.s.previsao<=somaDias(h,15)).map(x=>`${esc(nomeAnimal(x.a.id))} por volta de ${brCurto(x.s.previsao)}`).join(' · ')):''}
+  ${secar.length?alerta('info','Hora de secar', secar.map(x=>`${esc(nomeAnimal(x.a.id))} (secar ${brCurto(x.s.secar)})`).join(' · ')):''}
+  ${semDiag.length?alerta('info','Fazer diagnóstico de prenhez', semDiag.map(x=>`${esc(nomeAnimal(x.a.id))} (inseminada há ${x.s.diasServ} dias)`).join(' · '),`<button class="link" onclick="formDiagnostico()">Lançar diagnóstico</button>`):''}
+  <div class="faixa">
+    <div style="cursor:pointer" onclick="ir('rebanho')"><div class="l">Vacas</div><div class="v money">${vacas.length}</div><div class="s">${lact.length} em lactação · ${at.length} animais no total</div></div>
+    <div style="cursor:pointer" onclick="ir('reproducao')"><div class="l">Partos nos próximos 90 dias</div><div class="v money">${prox90.length}</div><div class="s">${partos.length} prenha(s) ou inseminada(s)</div></div>
+    <div style="cursor:pointer" onclick="ir('leite')"><div class="l">Última pesagem</div><div class="v money">${ultPes?dec1(soma(ultPes.itens||[],i=>i.litros))+' L':'—'}</div><div class="s">${ultPes?br(ultPes.data):'nenhuma ainda'}${proxBoost?` · próximo boost ${brCurto(proxBoost)}`:''}</div></div>
+    <div style="cursor:pointer" onclick="ir('caixa',{mes:'${mesAtual()}'})"><div class="l">Caixa: termina o mês com</div><div class="v money ${cx.fim<0?'neg':''}">${brl(cx.fim)}</div><div class="s">${f?`folha de ${MESES[+f.ref.slice(5)-1]}: líquido ${brl(f.liquidoPai)}`:'&nbsp;'}</div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><div class="panel-h"><div><h2>Rebanho hoje</h2><p class="sub">Animais ativos por categoria.</p></div><button class="btn sm" onclick="formAnimal()">${I.lancar}Novo animal</button></div>
+      ${cont.length?`<div class="tw"><table><tbody>${cont.map(([k,n])=>`<tr style="cursor:pointer" onclick="ir('rebanho',{fCat:'${k}'})"><td><span class="tag ${CATEGORIAS[k].tag}">${CATEGORIAS[k].nome}</span></td><td class="n money"><b>${n}</b></td></tr>`).join('')}</tbody><tfoot><tr><td>Total</td><td class="n">${at.length}</td></tr></tfoot></table></div>`:`<div class="vazio">Nenhum animal cadastrado.<br><button class="btn" onclick="formAnimal()">Cadastrar o primeiro animal</button></div>`}
+    </div>
+    <div class="panel"><div class="panel-h"><div><h2>Próximos partos</h2><p class="sub">Previsão pela inseminação/cobertura (${c.gestacao} dias).</p></div><button class="btn sm sec" onclick="ir('reproducao')">Ver todos</button></div>
+      ${partos.length?`<div class="tw"><table><thead><tr><th>Previsão</th><th>Vaca</th><th class="hide-m">Pai</th></tr></thead><tbody>${partos.slice(0,8).map(x=>`<tr><td>${br(x.s.previsao)}${x.s.status==='inseminada'?'<div class="muted" style="font-size:12px">sem diagnóstico</div>':''}</td><td>${linkAnimal(x.a.id)}</td><td class="hide-m">${esc(x.s.pai||'—')}${x.s.tipoServ==='ia'?' <span class="tag t-acc">IA</span>':''}</td></tr>`).join('')}</tbody></table></div>`:`<div class="vazio">Nenhuma vaca prenha ou inseminada lançada.</div>`}
+    </div>
+  </div>`;
+};
+
+/* ============================ REBANHO ============================ */
+R.rebanho = () => {
+  const b=V.busca.trim().toLowerCase();
+  let ls=animais.filter(a=>{
+    if(V.fSit==='ativa'&&!ativo(a)) return false;
+    if(V.fSit==='fora'&&ativo(a)) return false;
+    if(V.fCat==='vacas'&&!ehVaca(a)) return false;
+    if(V.fCat&&V.fCat!=='ativos'&&V.fCat!=='vacas'&&a.categoria!==V.fCat) return false;
+    if(b&&!(`${a.nome||''} ${a.brinco||''}`.toLowerCase().includes(b))) return false;
+    return true; }).sort(ordAnimal);
+  const at=animais.filter(ativo);
+  return `
+  <div class="head"><div><h1>Rebanho</h1><p>${at.filter(ehVaca).length} vaca(s), ${at.length} animal(is) no total. Toque num animal para ver a ficha completa.</p></div>
+    <div class="tools"><button class="btn" onclick="formAnimal()">${I.lancar}Novo animal</button></div></div>
+  <div class="tools" style="margin-bottom:12px">
+    <input class="inp" placeholder="Buscar por nome ou brinco" value="${esc(V.busca)}" oninput="V.busca=this.value;clearTimeout(window.__bq);window.__bq=setTimeout(()=>{render();const i=document.querySelector('main input');i.focus();i.setSelectionRange(i.value.length,i.value.length);},250)" style="min-width:220px">
+    <select class="inp" onchange="V.fCat=this.value;render()"><option value="ativos" ${V.fCat==='ativos'?'selected':''}>Todas as categorias</option><option value="vacas" ${V.fCat==='vacas'?'selected':''}>Só vacas (lactação + secas)</option>${optsCategoria(V.fCat)}</select>
+    <select class="inp" onchange="V.fSit=this.value;render()"><option value="ativa" ${V.fSit==='ativa'?'selected':''}>No rebanho</option><option value="fora" ${V.fSit==='fora'?'selected':''}>Vendidos, mortos e descarte</option><option value="todos" ${V.fSit==='todos'?'selected':''}>Todos</option></select>
+  </div>
+  <div class="panel">${ls.length?`<div class="tw"><table><thead><tr><th>Animal</th><th class="hide-m">Categoria</th><th class="hide-m">Idade</th><th class="hide-m">Mãe</th><th class="hide-m">Pai</th><th>Situação</th></tr></thead><tbody>
+    ${ls.map(a=>{ const s=femea(a)&&ativo(a)?statusRepro(a):null; const car=carenciasAtivas().find(c=>c.animalId===a.id); return `<tr style="cursor:pointer" onclick="abrirAnimal('${a.id}')">
+      <td><b>${rotulo(a)}</b>${car?` <span class="tag t-bad">carência até ${brCurto(car.fim)}</span>`:''}<div class="mob muted" style="font-size:12px">${(CATEGORIAS[a.categoria]||{}).curto||''}${a.nascimento?' · '+idadeTxt(a.nascimento):''}</div></td>
+      <td class="hide-m"><span class="tag ${(CATEGORIAS[a.categoria]||{}).tag||'t-mut'}">${(CATEGORIAS[a.categoria]||{}).curto||'—'}</span></td>
+      <td class="hide-m">${idadeTxt(a.nascimento)||'<span class="muted">—</span>'}</td>
+      <td class="hide-m">${a.maeId?esc(nomeAnimal(a.maeId)):(a.maeNome?esc(a.maeNome):'<span class="muted">—</span>')}</td>
+      <td class="hide-m">${paiTxt(a)}</td>
+      <td>${!ativo(a)?`<span class="tag t-mut">${SITUACOES[a.situacao]}</span>`:s&&(s.status==='prenha'||s.status==='inseminada')?`<span class="tag ${STATUS_TAG[s.status]}">${s.status==='prenha'?'Prenha':'Inseminada'}</span><div class="muted" style="font-size:12px">parto ~${brCurto(s.previsao)}</div>`:s&&s.status==='vazia'?'<span class="tag t-bad">Vazia</span>':'<span class="muted">—</span>'}</td></tr>`; }).join('')}
+    </tbody></table></div>`:`<div class="vazio">${animais.length?'Nenhum animal com esses filtros.':'Nenhum animal cadastrado ainda.'}<br><button class="btn" onclick="formAnimal()">Cadastrar animal</button></div>`}</div>`;
+};
+function abrirAnimal(id){ fecharModalSilencioso(); ir('animal',{animalId:id}); }
+function fecharModalSilencioso(){ $('modal').classList.remove('on'); MODAL=null; }
+
+/* ---------- ficha do animal ---------- */
+const TIPOS_EV = {ia:'Inseminação artificial', cobertura:'Cobertura (touro)', diagnostico:'Diagnóstico de prenhez', parto:'Parto', secagem:'Secagem', obs:'Observação'};
+R.animal = () => {
+  const a=ani(V.animalId); if(!a) return `<div class="vazio">Animal não encontrado. <button class="link" onclick="ir('rebanho')">Voltar ao rebanho</button></div>`;
+  const s=femea(a)?statusRepro(a):null, evs=evDe(a.id).reverse();
+  const filhos=animais.filter(x=>x.maeId===a.id||x.paiId===a.id).sort((x,y)=>(y.nascimento||'').localeCompare(x.nascimento||''));
+  const trats=tratamentos.filter(t=>(t.vacas||[]).includes(a.id)).sort((x,y)=>y.data.localeCompare(x.data));
+  const prod=pesagens.map(p=>({data:p.data, i:(p.itens||[]).find(i=>i.animalId===a.id)})).filter(x=>x.i).sort((x,y)=>y.data.localeCompare(x.data));
+  const car=carenciasAtivas().find(c=>c.animalId===a.id);
+  const ln=(k,v)=>`<div class="ln"><span class="muted">${k}</span><span>${v}</span></div>`;
+  return `
+  <div class="head"><div><button class="link" onclick="ir('rebanho')">${I.esq} Rebanho</button><h1 style="margin-top:6px">${esc(a.nome||'Sem nome')}${a.brinco?` <span class="brinco grande">${esc(a.brinco)}</span>`:''}</h1>
+    <p><span class="tag ${(CATEGORIAS[a.categoria]||{}).tag||'t-mut'}">${(CATEGORIAS[a.categoria]||{}).nome||'—'}</span> ${!ativo(a)?`<span class="tag t-mut">${SITUACOES[a.situacao]}${a.saidaData?' em '+br(a.saidaData):''}</span>`:''}${car?` <span class="tag t-bad">leite em carência até ${br(car.fim)}</span>`:''}</p></div>
+    <div class="tools"><button class="btn sec" onclick="formAnimal('${a.id}')">${I.editar}Editar</button>${femea(a)&&ativo(a)?`<button class="btn" onclick="formServico(null,'${a.id}')">Inseminação</button>`:''}</div></div>
+  ${a.fotoId?`<div class="panel" style="padding:10px"><img class="fotoanimal" data-foto="${a.fotoId}" alt="Foto"></div>`:''}
+  <div class="grid2">
+    <div class="panel"><h2>Dados</h2>
+      ${ln('Brinco',esc(a.brinco||'—'))}${ln('Raça',esc(a.raca||'—'))}${ln('Nascimento',a.nascimento?br(a.nascimento)+' · '+idadeTxt(a.nascimento):'—')}
+      ${ln('Mãe',a.maeId?linkAnimal(a.maeId):esc(a.maeNome||'—'))}${ln('Pai',(a.paiId?linkAnimal(a.paiId):paiTxt(a))+(a.paiTipo==='ia'?' <span class="tag t-acc">IA</span>':a.paiTipo==='natural'?' <span class="tag t-mut">monta natural</span>':''))}
+      ${ln('Origem',a.origem==='comprada'?`Comprada${a.compraData?' em '+br(a.compraData):''}${a.compraDe?' de '+esc(a.compraDe):''}${num(a.compraValor)?' · '+brl(a.compraValor):''}`:'Nasceu na fazenda')}
+      ${a.obs?ln('Observação',esc(a.obs)):''}${(a.anexos||[]).length?ln('Documentos',clipBtn(a.anexos)):''}
+    </div>
+    ${s?`<div class="panel"><h2>Reprodução</h2>
+      ${ln('Situação',`<span class="tag ${STATUS_TAG[s.status]}">${STATUS_TXT[s.status]}</span>`)}
+      ${s.ultParto?ln('Último parto',br(s.ultParto.data)+` (${difDias(hoje(),s.ultParto.data)} dias)`):''}
+      ${s.ultServ?ln(s.ultServ.tipo==='ia'?'Inseminada em':'Coberta em',br(s.ultServ.data)+(s.servicos>1?` · ${s.servicos}º serviço`:'')):''}
+      ${s.pai?ln('Touro / sêmen',esc(s.pai)):''}
+      ${s.previsao?ln('Previsão do parto','<b>'+br(s.previsao)+'</b>'):''}${s.secar?ln('Secar em',br(s.secar)):''}
+      ${ln('Partos registrados',s.partos)}
+      <div class="tools" style="margin-top:12px"><button class="btn sm sec" onclick="formServico(null,'${a.id}')">Inseminação/cobertura</button><button class="btn sm sec" onclick="formDiagnostico(null,'${a.id}')">Diagnóstico</button><button class="btn sm sec" onclick="formParto(null,'${a.id}')">Parto</button><button class="btn sm sec" onclick="formSecagem('${a.id}')">Secagem</button></div>
+    </div>`:'<div></div>'}
+  </div>
+  <div class="panel"><div class="panel-h"><div><h2>Histórico</h2><p class="sub">Inseminações, diagnósticos, partos, secagens e observações.</p></div><button class="btn sm sec" onclick="formObs('${a.id}')">${I.lancar}Observação</button></div>
+    ${evs.length?`<div class="tw"><table><tbody>${evs.map(e=>`<tr><td style="width:96px">${br(e.data)}</td><td><b>${TIPOS_EV[e.tipo]||e.tipo}</b> ${descEvento(e)}</td><td class="act"><button class="icon-btn" title="Editar" onclick="editarEvento('${e.id}')">${I.editar}</button><button class="icon-btn" title="Apagar" onclick="apagarEvento('${e.id}')">${I.lixo}</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="vazio">Nada lançado ainda.</div>'}
+  </div>
+  <div class="grid2">
+    <div class="panel"><h2>Remédios e vacinas</h2>
+      ${trats.length?`<div class="tw"><table><tbody>${trats.map(t=>`<tr style="cursor:pointer" onclick="formTratamento('${t.id}')"><td>${br(t.data)}</td><td><b>${esc(t.produto)}</b>${t.dose?` · ${esc(t.dose)}`:''}${int(t.carencia)?`<div class="muted" style="font-size:12px">carência até ${br(somaDias(t.data,int(t.carencia)))}</div>`:''}</td></tr>`).join('')}</tbody></table></div>`:'<div class="vazio">Nenhum remédio lançado para este animal.</div>'}
+    </div>
+    <div class="panel"><h2>Produção de leite</h2>
+      ${prod.length?`<div class="tw"><table><thead><tr><th>Dia</th><th class="n">Litros</th><th>Boost</th></tr></thead><tbody>${prod.slice(0,12).map(x=>`<tr><td>${br(x.data)}</td><td class="n money">${dec1(x.i.litros)}</td><td>${x.i.boost?'<span class="tag t-ok">aplicado</span>':'<span class="muted">—</span>'}</td></tr>`).join('')}</tbody></table></div>`:'<div class="vazio">Nenhuma pesagem desta vaca.</div>'}
+    </div>
+  </div>
+  ${filhos.length?`<div class="panel"><h2>Crias</h2><div class="tw"><table><tbody>${filhos.map(f=>`<tr style="cursor:pointer" onclick="abrirAnimal('${f.id}')"><td>${rotulo(f)}</td><td>${(CATEGORIAS[f.categoria]||{}).curto||''}</td><td>${f.nascimento?br(f.nascimento):''}</td><td>${!ativo(f)?`<span class="tag t-mut">${SITUACOES[f.situacao]}</span>`:''}</td></tr>`).join('')}</tbody></table></div></div>`:''}`;
+};
+function descEvento(e){
+  const p=e.paiId?nomeAnimal(e.paiId):e.paiNome;
+  if(e.tipo==='ia'||e.tipo==='cobertura') return `${p?'· '+esc(p):''}${e.inseminador?` · por ${esc(e.inseminador)}`:''}${e.obs?` · ${esc(e.obs)}`:''}`;
+  if(e.tipo==='diagnostico') return `· <span class="tag ${e.resultado==='prenha'?'t-ok':'t-bad'}">${e.resultado==='prenha'?'Prenha':'Vazia'}</span>${e.metodo?' · '+esc(e.metodo):''}${e.previsao?' · parto previsto '+br(e.previsao):''}${e.obs?` · ${esc(e.obs)}`:''}`;
+  if(e.tipo==='parto') return `${e.crias&&e.crias.length?'· cria: '+e.crias.map(c=>linkAnimal(c)).join(', '):''}${e.criaMorta?' · cria morta':''}${e.obs?` · ${esc(e.obs)}`:''}`;
+  return e.obs?'· '+esc(e.obs):'';
+}
+async function carregarFotosAnimal(){
+  for(const img of document.querySelectorAll('img[data-foto]')){
+    const id=img.dataset.foto; if(img.src) continue;
+    try{ const s=await db.collection('fotos').doc(id).get(); if(s.exists) img.src=s.data().img; }catch(e){}
+  }
+}
+
+/* ---------- cadastro do animal ---------- */
+let fotoAnimal=null;
+function formAnimal(id, padrao){
+  const a=id?ani(id):{situacao:'ativa', categoria:'lactacao', origem:'nascida', ...(padrao||{})};
+  if(!a) return; fotoAnimal=null;
+  const touros=animais.filter(x=>x.categoria==='touro');
+  abrirModal({titulo:id?'Editar animal':'Novo animal', larg:'680px',
+    corpo:`<div class="fg">
+      <label class="field"><span>Nome</span><input class="inp" name="nome" value="${esc(a.nome||'')}"></label>
+      <label class="field"><span>Brinco</span><input class="inp" name="brinco" value="${esc(a.brinco||'')}"></label>
+      <label class="field"><span>Categoria</span><select class="inp" name="cat">${optsCategoria(a.categoria)}</select></label>
+      <label class="field"><span>Raça (opcional)</span><input class="inp" name="raca" value="${esc(a.raca||'')}" list="sugRaca"></label>
+      <label class="field"><span>Nascimento (opcional)</span><input class="inp" type="date" name="nasc" value="${esc(a.nascimento||'')}"></label>
+      <label class="field"><span>Mãe (opcional)</span><select class="inp" name="mae"><option value="">— não sei / não é do rebanho —</option>${optsAnimais(a.maeId||'', x=>femea(x)&&x.id!==id)}</select></label>
+      <label class="field"><span>Pai: touro do rebanho</span><select class="inp" name="paiId"><option value="">—</option>${touros.filter(t=>t.id!==id).map(t=>`<option value="${t.id}" ${t.id===a.paiId?'selected':''}>${esc(t.nome||t.brinco)}</option>`).join('')}</select></label>
+      <label class="field"><span>…ou nome do touro / sêmen</span><input class="inp" name="paiNome" value="${esc(a.paiNome||'')}" list="sugSemen"></label>
+      <label class="field"><span>Como foi gerado</span><select class="inp" name="paiTipo"><option value="">Não sei</option><option value="ia" ${a.paiTipo==='ia'?'selected':''}>Inseminação artificial</option><option value="natural" ${a.paiTipo==='natural'?'selected':''}>Monta natural</option></select></label>
+      <label class="field"><span>Origem</span><select class="inp" name="origem" onchange="$('blocoCompra').style.display=this.value==='comprada'?'':'none'"><option value="nascida">Nasceu na fazenda</option><option value="comprada" ${a.origem==='comprada'?'selected':''}>Comprada</option></select></label>
+    </div>
+    <div class="fg3" id="blocoCompra" style="${a.origem==='comprada'?'':'display:none'}">
+      <label class="field"><span>Comprada em</span><input class="inp" type="date" name="cData" value="${esc(a.compraData||'')}"></label>
+      <label class="field"><span>De quem</span><input class="inp" name="cDe" value="${esc(a.compraDe||'')}"></label>
+      <label class="field"><span>Valor (R$)</span><input class="inp num" name="cValor" inputmode="decimal" value="${fmtInp(a.compraValor)}"></label>
+    </div>
+    <div class="fg">
+      <label class="field"><span>Situação</span><select class="inp" name="sit" onchange="$('blocoSaida').style.display=this.value==='ativa'?'none':''">${Object.entries(SITUACOES).map(([k,n])=>`<option value="${k}" ${k===(a.situacao||'ativa')?'selected':''}>${n}</option>`).join('')}</select></label>
+      <div id="blocoSaida" style="${(a.situacao||'ativa')==='ativa'?'display:none':''}" class="fg" >
+        <label class="field"><span>Data</span><input class="inp" type="date" name="sData" value="${esc(a.saidaData||'')}"></label>
+        <label class="field"><span>Valor da venda</span><input class="inp num" name="sValor" inputmode="decimal" value="${fmtInp(a.saidaValor)}"></label></div>
+      <label class="field full"><span>Observação</span><input class="inp" name="obs" value="${esc(a.obs||'')}"></label>
+      <label class="field full"><span>Foto (opcional)${a.fotoId?' · já tem uma, escolha outra só para trocar':''}</span><input class="inp" type="file" accept="image/*" onchange="lerFotoAnimal(this)"></label>
+    </div><div id="aFoto"></div>
+    ${campoAnexos(a.anexos)}
+    <datalist id="sugRaca">${['Girolando','Holandesa','Gir','Jersey','Guzerá','Nelore','Mestiça'].map(x=>`<option value="${x}">`).join('')}</datalist>${datalistSemen()}`,
+    extra:id?`<button type="button" class="btn danger" style="margin-right:auto" onclick="apagarAnimal('${id}')">${I.lixo}Apagar</button>`:'',
+    aoConfirmar:async f=>{
+      const o={...a, nome:f.nome.value.trim(), brinco:f.brinco.value.trim(), categoria:f.cat.value, raca:f.raca.value.trim(), nascimento:f.nasc.value,
+        maeId:f.mae.value, paiId:f.paiId.value, paiNome:f.paiId.value?'':f.paiNome.value.trim(), paiTipo:f.paiTipo.value, origem:f.origem.value,
+        compraData:f.origem.value==='comprada'?f.cData.value:'', compraDe:f.origem.value==='comprada'?f.cDe.value.trim():'', compraValor:f.origem.value==='comprada'?num(f.cValor.value):0,
+        situacao:f.sit.value, saidaData:f.sit.value==='ativa'?'':f.sData.value, saidaValor:f.sit.value==='ativa'?0:num(f.sValor.value), obs:f.obs.value.trim()};
+      o.sexo=CATEGORIAS[o.categoria].femea?'F':'M';
+      if(!o.nome&&!o.brinco){ toast('Informe o nome ou o brinco.',true); return false; }
+      if(o.brinco && animais.some(x=>x.id!==id&&ativo(x)&&String(x.brinco).trim().toLowerCase()===o.brinco.toLowerCase())){ toast('Já existe um animal ativo com esse brinco.',true); return false; }
+      if(preparandoFoto){ toast('Aguarde a foto terminar de carregar.',true); return false; }
+      try{ o.anexos=await salvarAnexos('animal'); }catch(e){ return false; }
+      if(fotoAnimal){ const fid=uid(); await gravar('fotos',{id:fid, img:fotoAnimal, tipo:'animal', criado:Date.now()}); o.fotoId=fid; }
+      if(o.paiNome) lembrarSemen(o.paiNome);
+      if(!id) o.criado=Date.now();
+      const nid=await gravar('animais',o); toast(id?'Animal atualizado':'Animal cadastrado');
+      if(!id && pag==='animal') V.animalId=nid;
+    }});
+}
+let preparandoFoto=false;
+async function lerFotoAnimal(inp){
+  const f=inp.files&&inp.files[0]; if(!f){ fotoAnimal=null; $('aFoto').innerHTML=''; return; }
+  preparandoFoto=true;
+  try{ fotoAnimal=await comprimir(f); $('aFoto').innerHTML=`<img class="fotoprev" src="${fotoAnimal}" alt="Foto">`; }
+  catch(e){ fotoAnimal=null; toast('Não foi possível ler essa foto.',true); }
+  preparandoFoto=false;
+}
+function apagarAnimal(id){
+  const a=ani(id); if(!a) return;
+  const usado=eventos.some(e=>e.animalId===id)||tratamentos.some(t=>(t.vacas||[]).includes(id))||pesagens.some(p=>(p.itens||[]).some(i=>i.animalId===id))||animais.some(x=>x.maeId===id||x.paiId===id);
+  if(usado){ abrirModal({titulo:'Não dá para apagar', desc:`${esc(a.nome||a.brinco)} tem histórico (eventos, remédios, pesagens ou crias). Se ela saiu do rebanho, edite e mude a situação para vendida, morreu ou descarte — o histórico fica guardado.`, ok:'', cancelar:'Entendi'}); return; }
+  confirmar('Apagar '+esc(a.nome||a.brinco)+'?','O cadastro sai do sistema. Para animais vendidos ou mortos, prefira mudar a situação.','Apagar',async()=>{ apagarAnexosDe(a.anexos); await apagarDoc('animais',id); toast('Animal apagado'); if(pag==='animal') pag='rebanho'; });
+}
+function datalistSemen(){ const nomes=[...new Set([...cad.semens.map(s=>s.nome), ...eventos.map(e=>e.paiNome).filter(Boolean), ...animais.map(a=>a.paiNome).filter(Boolean)])].sort(); return `<datalist id="sugSemen">${nomes.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`; }
+function lembrarSemen(nome){ if(nome && !cad.semens.some(s=>s.nome.toLowerCase()===nome.toLowerCase())){ cad.semens.push({id:uid(), nome}); salvar(); } }
+
+/* ============================ REPRODUÇÃO ============================ */
+R.reproducao = () => {
+  const h=hoje(), c=cfg();
+  const st=animais.filter(a=>ativo(a)&&femea(a)&&a.categoria!=='bezerra').map(a=>({a,s:statusRepro(a)}));
+  const partos=st.filter(x=>x.s.previsao).sort((x,y)=>x.s.previsao.localeCompare(y.s.previsao));
+  const secar=st.filter(x=>x.s.secar&&x.a.categoria==='lactacao').sort((x,y)=>x.s.secar.localeCompare(y.s.secar));
+  const semDiag=st.filter(x=>x.s.status==='inseminada');
+  const vazias=st.filter(x=>x.s.status==='vazia'||x.s.status==='parida'||x.s.status==='sem');
+  const porMes={}; partos.forEach(x=>{ const m=x.s.previsao.slice(0,7); porMes[m]=(porMes[m]||0)+1; });
+  return `
+  <div class="head"><div><h1>Reprodução e partos</h1><p>Previsão de parto = inseminação/cobertura + ${c.gestacao} dias (ou a data informada no diagnóstico). Secar ${c.secagem} dias antes.</p></div>
+    <div class="tools"><button class="btn sec" onclick="formDiagnostico()">Diagnóstico</button><button class="btn sec" onclick="formParto()">Parto</button><button class="btn" onclick="formServico()">${I.lancar}Inseminação / cobertura</button></div></div>
+  ${Object.keys(porMes).length?`<div class="faixa">${Object.keys(porMes).sort().slice(0,4).map(m=>`<div><div class="l">Partos em ${MESES[+m.slice(5)-1]}</div><div class="v money">${porMes[m]}</div><div class="s">${m.slice(0,4)}</div></div>`).join('')}${Array(Math.max(0,4-Object.keys(porMes).length)).fill('<div></div>').join('')}</div>`:''}
+  <div class="panel"><div class="panel-h"><div><h2>Vão parir</h2><p class="sub">Prenhas e inseminadas, da previsão mais próxima para a mais distante.</p></div></div>
+    ${partos.length?`<div class="tw"><table><thead><tr><th>Previsão</th><th>Vaca</th><th>Pai (touro / sêmen)</th><th class="hide-m">Serviço</th><th class="hide-m">Secar em</th><th>Situação</th></tr></thead><tbody>
+    ${partos.map(x=>`<tr><td><b>${br(x.s.previsao)}</b><div class="muted" style="font-size:12px">${difDias(x.s.previsao,h)>=0?'faltam '+difDias(x.s.previsao,h)+' dias':'passou '+(-difDias(x.s.previsao,h))+' dias'}</div></td><td>${linkAnimal(x.a.id)}</td><td>${esc(x.s.pai||'—')}</td><td class="hide-m">${x.s.tipoServ==='ia'?'<span class="tag t-acc">IA</span>':'<span class="tag t-mut">monta</span>'} ${br(x.s.ultServ.data)}</td><td class="hide-m">${x.a.categoria==='lactacao'?br(x.s.secar):'<span class="muted">já seca</span>'}</td><td><span class="tag ${STATUS_TAG[x.s.status]}">${x.s.status==='prenha'?'Prenha':'Sem diagnóstico'}</span></td></tr>`).join('')}
+    </tbody></table></div>`:`<div class="vazio">Nenhuma vaca prenha ou inseminada lançada.<br><button class="btn" onclick="formServico()">Lançar inseminação</button></div>`}
+  </div>
+  <div class="grid2">
+    <div class="panel"><h2>Para secar</h2><p class="sub">Vacas em lactação com parto previsto.</p>
+      ${secar.length?`<div class="tw"><table><tbody>${secar.map(x=>`<tr><td>${linkAnimal(x.a.id)}</td><td class="n ${x.s.secar<=h?'neg':''}">${br(x.s.secar)}</td><td class="act"><button class="btn sm sec" onclick="formSecagem('${x.a.id}')">Secou</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="vazio">Nenhuma.</div>'}
+    </div>
+    <div class="panel"><h2>Aguardando diagnóstico</h2><p class="sub">Inseminadas ou cobertas sem diagnóstico de prenhez.</p>
+      ${semDiag.length?`<div class="tw"><table><tbody>${semDiag.map(x=>`<tr><td>${linkAnimal(x.a.id)}</td><td>há ${x.s.diasServ} dias</td><td class="act"><button class="btn sm sec" onclick="formDiagnostico(null,'${x.a.id}')">Diagnóstico</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="vazio">Nenhuma.</div>'}
+    </div>
+  </div>
+  <div class="panel"><h2>Vazias ou sem inseminação</h2><p class="sub">Fêmeas adultas sem prenhez registrada.</p>
+    ${vazias.length?`<div class="tw"><table><tbody>${vazias.map(x=>`<tr><td>${linkAnimal(x.a.id)}</td><td><span class="tag ${STATUS_TAG[x.s.status]}">${STATUS_TXT[x.s.status]}</span>${x.s.ultParto?`<div class="muted" style="font-size:12px">pariu há ${difDias(h,x.s.ultParto.data)} dias</div>`:''}</td><td class="act"><button class="btn sm sec" onclick="formServico(null,'${x.a.id}')">Inseminar</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="vazio">Nenhuma.</div>'}
+  </div>`;
+};
+const optsFemeas = sel => optsAnimais(sel, a=>femea(a)&&a.categoria!=='bezerra');
+function formServico(id, animalId){
+  const e=id?eventos.find(x=>x.id===id):{tipo:'ia', data:hoje(), animalId:animalId||''};
+  if(!e) return;
+  const touros=animais.filter(x=>x.categoria==='touro'&&ativo(x));
+  abrirModal({titulo:id?'Editar inseminação / cobertura':'Inseminação ou cobertura',
+    corpo:`<input type="hidden" name="tipo" value="${e.tipo}">
+    <div class="seg" style="margin-top:8px"><button type="button" class="${e.tipo==='ia'?'on':''}" onclick="this.form.tipo.value='ia';[...this.parentNode.children].forEach(b=>b.classList.toggle('on',b===this))">Inseminação artificial</button><button type="button" class="${e.tipo==='cobertura'?'on':''}" onclick="this.form.tipo.value='cobertura';[...this.parentNode.children].forEach(b=>b.classList.toggle('on',b===this))">Cobertura (touro)</button></div>
+    <div class="fg">
+      <label class="field"><span>Vaca</span><select class="inp" name="ani" required><option value="">Escolha…</option>${optsFemeas(e.animalId)}</select></label>
+      <label class="field"><span>Data</span><input class="inp" type="date" name="data" value="${esc(e.data)}" required></label>
+      <label class="field"><span>Touro do rebanho</span><select class="inp" name="paiId"><option value="">—</option>${touros.map(t=>`<option value="${t.id}" ${t.id===e.paiId?'selected':''}>${esc(t.nome||t.brinco)}</option>`).join('')}</select></label>
+      <label class="field"><span>…ou nome do touro / sêmen</span><input class="inp" name="paiNome" value="${esc(e.paiNome||'')}" list="sugSemen" placeholder="Ex.: nome do touro da palheta"></label>
+      <label class="field"><span>Quem inseminou (opcional)</span><input class="inp" name="insem" value="${esc(e.inseminador||'')}"></label>
+      <label class="field"><span>Observação</span><input class="inp" name="obs" value="${esc(e.obs||'')}"></label>
+    </div>${datalistSemen()}<div class="ajuda">Previsão do parto: ${cfg().gestacao} dias depois. Ela aparece em “Reprodução e partos”.</div>`,
+    aoConfirmar:async f=>{
+      const o={...e, tipo:f.tipo.value, animalId:f.ani.value, data:f.data.value, paiId:f.paiId.value, paiNome:f.paiId.value?'':f.paiNome.value.trim(), inseminador:f.insem.value.trim(), obs:f.obs.value.trim()};
+      if(!o.animalId||!o.data){ toast('Escolha a vaca e a data.',true); return false; }
+      if(!id) o.criado=Date.now(); if(o.paiNome) lembrarSemen(o.paiNome);
+      await gravar('eventos',o); toast(`${o.tipo==='ia'?'Inseminação':'Cobertura'} lançada · parto previsto ${br(somaDias(o.data,cfg().gestacao))}`);
+    }});
+}
+function formDiagnostico(id, animalId){
+  const e=id?eventos.find(x=>x.id===id):{tipo:'diagnostico', data:hoje(), resultado:'prenha', animalId:animalId||''};
+  if(!e) return;
+  const pend=animais.filter(a=>ativo(a)&&femea(a)&&statusRepro(a).status==='inseminada');
+  abrirModal({titulo:'Diagnóstico de prenhez',
+    corpo:`<div class="fg">
+      <label class="field"><span>Vaca</span><select class="inp" name="ani" required><option value="">Escolha…</option>${pend.length&&!id?`<optgroup label="Aguardando diagnóstico">${pend.sort(ordAnimal).map(a=>`<option value="${a.id}" ${a.id===e.animalId?'selected':''}>${esc(a.nome||a.brinco)}</option>`).join('')}</optgroup><optgroup label="Todas">`:''}${optsFemeas(pend.some(a=>a.id===e.animalId)&&!id?'':e.animalId)}${pend.length&&!id?'</optgroup>':''}</select></label>
+      <label class="field"><span>Data</span><input class="inp" type="date" name="data" value="${esc(e.data)}" required></label>
+      <label class="field"><span>Resultado</span><select class="inp" name="res"><option value="prenha">Prenha</option><option value="vazia" ${e.resultado==='vazia'?'selected':''}>Vazia</option></select></label>
+      <label class="field"><span>Como (opcional)</span><input class="inp" name="metodo" value="${esc(e.metodo||'')}" placeholder="toque, ultrassom…" list="sugMetodo"></label>
+      <label class="field"><span>Parto previsto pelo veterinário (opcional)</span><input class="inp" type="date" name="prev" value="${esc(e.previsao||'')}"></label>
+      <label class="field"><span>Observação</span><input class="inp" name="obs" value="${esc(e.obs||'')}"></label>
+    </div><datalist id="sugMetodo"><option value="Toque"><option value="Ultrassom"></datalist><div class="ajuda">Se deixar o parto previsto vazio, o sistema calcula pela data da inseminação.</div>`,
+    aoConfirmar:async f=>{
+      const o={...e, animalId:f.ani.value, data:f.data.value, resultado:f.res.value, metodo:f.metodo.value.trim(), previsao:f.res.value==='prenha'?f.prev.value:'', obs:f.obs.value.trim()};
+      if(!o.animalId||!o.data){ toast('Escolha a vaca e a data.',true); return false; }
+      if(!id) o.criado=Date.now();
+      await gravar('eventos',o); toast('Diagnóstico lançado: '+(o.resultado==='prenha'?'prenha':'vazia'));
+    }});
+}
+function formParto(id, animalId){
+  const e=id?eventos.find(x=>x.id===id):{tipo:'parto', data:hoje(), animalId:animalId||''};
+  if(!e) return;
+  if(id){ return formObs(e.animalId, id); }
+  const s=animalId?statusRepro(ani(animalId)||{}):null;
+  abrirModal({titulo:'Registrar parto', larg:'620px',
+    corpo:`<div class="fg">
+      <label class="field"><span>Mãe</span><select class="inp" name="ani" required onchange="sugerirPaiParto(this.value)"><option value="">Escolha…</option>${optsFemeas(e.animalId)}</select></label>
+      <label class="field"><span>Data do parto</span><input class="inp" type="date" name="data" value="${esc(e.data)}" required></label>
+      <label class="field"><span>Cria</span><select class="inp" name="sexo"><option value="F">Fêmea (bezerra)</option><option value="M">Macho (bezerro)</option><option value="morta">Nasceu morta / morreu</option></select></label>
+      <label class="field"><span>Nome da cria (opcional)</span><input class="inp" name="nome"></label>
+      <label class="field"><span>Brinco da cria (opcional)</span><input class="inp" name="brinco"></label>
+      <label class="field"><span>Pai (touro / sêmen)</span><input class="inp" name="pai" value="${esc(s&&s.pai||'')}" list="sugSemen"></label>
+      <label class="field full"><span>Observação</span><input class="inp" name="obs"></label>
+    </div>${datalistSemen()}<div class="ajuda">A cria entra no rebanho com mãe e pai preenchidos, e a mãe passa para “Vaca em lactação”.</div>`,
+    aoConfirmar:async f=>{
+      const mae=ani(f.ani.value); if(!mae||!f.data.value){ toast('Escolha a mãe e a data.',true); return false; }
+      const st=statusRepro(mae), ev={tipo:'parto', animalId:mae.id, data:f.data.value, obs:f.obs.value.trim(), criado:Date.now(), crias:[]};
+      if(f.sexo.value==='morta') ev.criaMorta=true;
+      else {
+        const paiNome=f.pai.value.trim(), paiAnimal=st.ultServ&&st.ultServ.paiId&&nomeAnimal(st.ultServ.paiId)===paiNome?st.ultServ.paiId:'';
+        const cria={nome:f.nome.value.trim(), brinco:f.brinco.value.trim(), sexo:f.sexo.value, categoria:f.sexo.value==='F'?'bezerra':'bezerro', nascimento:f.data.value, maeId:mae.id,
+          paiId:paiAnimal, paiNome:paiAnimal?'':paiNome, paiTipo:st.ultServ?(st.ultServ.tipo==='ia'?'ia':'natural'):'', origem:'nascida', situacao:'ativa', raca:mae.raca||'', criado:Date.now()};
+        if(!cria.nome&&!cria.brinco) cria.nome=(f.sexo.value==='F'?'Bezerra da ':'Bezerro da ')+(mae.nome||mae.brinco);
+        ev.crias=[await gravar('animais',cria)];
+      }
+      await gravar('eventos',ev);
+      if(mae.categoria!=='lactacao') await gravar('animais',{...mae, categoria:'lactacao'});
+      toast('Parto registrado'+(ev.crias.length?' · cria cadastrada':''));
+    }});
+}
+function sugerirPaiParto(id){ const a=ani(id), f=$('mform'); if(!a||!f) return; const s=statusRepro(a); if(s.pai&&!f.pai.value) f.pai.value=s.pai; }
+function formSecagem(animalId){
+  const a=ani(animalId); if(!a) return;
+  abrirModal({titulo:'Secar '+esc(a.nome||a.brinco), ok:'Registrar secagem',
+    corpo:`<label class="field"><span>Data da secagem</span><input class="inp" type="date" name="data" value="${hoje()}" required></label><label class="field"><span>Observação</span><input class="inp" name="obs"></label><div class="ajuda">A vaca passa para “Vaca seca” e sai da lista do boost.</div>`,
+    aoConfirmar:async f=>{ await gravar('eventos',{tipo:'secagem', animalId, data:f.data.value, obs:f.obs.value.trim(), criado:Date.now()}); await gravar('animais',{...a, categoria:'seca'}); toast('Secagem registrada'); }});
+}
+function formObs(animalId, id){
+  const e=id?eventos.find(x=>x.id===id):{tipo:'obs', data:hoje(), animalId};
+  abrirModal({titulo:id?'Editar: '+(TIPOS_EV[e.tipo]||''):'Observação',
+    corpo:`<label class="field"><span>Data</span><input class="inp" type="date" name="data" value="${esc(e.data)}" required></label><label class="field"><span>Observação</span><input class="inp" name="obs" value="${esc(e.obs||'')}" ${e.tipo==='obs'?'required':''}></label>`,
+    aoConfirmar:async f=>{ const o={...e, data:f.data.value, obs:f.obs.value.trim()}; if(e.tipo==='obs'&&!o.obs){ toast('Escreva a observação.',true); return false; } if(!id) o.criado=Date.now(); await gravar('eventos',o); toast('Salvo'); }});
+}
+function editarEvento(id){
+  const e=eventos.find(x=>x.id===id); if(!e) return;
+  if(e.tipo==='ia'||e.tipo==='cobertura') return formServico(id);
+  if(e.tipo==='diagnostico') return formDiagnostico(id);
+  return formObs(e.animalId,id);
+}
+function apagarEvento(id){
+  const e=eventos.find(x=>x.id===id); if(!e) return;
+  confirmar('Apagar este registro?', `${TIPOS_EV[e.tipo]||e.tipo} de ${esc(nomeAnimal(e.animalId))} em ${br(e.data)}.${e.tipo==='parto'&&(e.crias||[]).length?' A cria continua cadastrada no rebanho.':''}`, 'Apagar', async()=>{ await apagarDoc('eventos',id); toast('Registro apagado'); });
+}
+
+/* ============================ REMÉDIOS E VACINAS ============================ */
+R.saude = () => {
+  const ym=V.mes, ls=tratamentos.filter(t=>noMes(t.data,ym)).sort((a,b)=>b.data.localeCompare(a.data)||tempo(b)-tempo(a));
+  const car=carenciasAtivas();
+  return `
+  <div class="head"><div><h1>Remédios e vacinas</h1><p>O que foi comprado/aplicado, em quais vacas e até quando o leite fica em carência.</p></div>
+    <div class="tools">${seletorMes()}<button class="btn" onclick="formTratamento()">${I.lancar}Remédio ou vacina</button></div></div>
+  ${car.length?`<div class="panel"><h2>Leite em carência agora</h2><p class="sub">Não mandar o leite destas vacas para o tanque até a data.</p><div class="tw"><table><tbody>${car.map(c=>`<tr><td>${linkAnimal(c.animalId)}</td><td>${esc(c.produto)}</td><td class="n neg"><b>até ${br(c.fim)}</b></td></tr>`).join('')}</tbody></table></div></div>`:''}
+  <div class="faixa"><div><div class="l">Lançamentos no mês</div><div class="v money">${ls.length}</div></div><div><div class="l">Gasto com remédios</div><div class="v money">${brl(soma(ls,t=>t.valor))}</div></div><div><div class="l">Vacas tratadas</div><div class="v money">${new Set(ls.flatMap(t=>t.vacas||[])).size}</div></div><div><div class="l">Em carência hoje</div><div class="v money ${car.length?'neg':''}">${car.length}</div></div></div>
+  <div class="panel">${ls.length?`<div class="tw"><table><thead><tr><th>Data</th><th>Produto</th><th>Para quais animais</th><th class="hide-m">Carência</th><th class="n">Valor</th><th></th></tr></thead><tbody>
+    ${ls.map(t=>`<tr><td>${brCurto(t.data)}</td><td><b>${esc(t.produto)}</b>${t.dose?`<div class="muted" style="font-size:12px">${esc(t.dose)}</div>`:''}</td><td>${(t.vacas||[]).length?(t.vacas.length>6?`${t.vacas.length} animais`:t.vacas.map(v=>animalTag(v)).join(' ')):'<span class="muted">estoque / sem vaca</span>'}</td>
+      <td class="hide-m">${int(t.carencia)?`${int(t.carencia)} dias · até ${brCurto(somaDias(t.data,int(t.carencia)))}`:'<span class="muted">—</span>'}</td><td class="n money">${num(t.valor)?brl(t.valor):'<span class="muted">—</span>'}</td>
+      <td class="act">${clipBtn(t.anexos)}<button class="icon-btn" onclick="formTratamento('${t.id}')" title="Editar">${I.editar}</button><button class="icon-btn" onclick="apagarTratamento('${t.id}')" title="Apagar">${I.lixo}</button></td></tr>`).join('')}
+    </tbody></table></div>`:`<div class="vazio">Nada lançado em ${mesNome(ym)}.<br><button class="btn" onclick="formTratamento()">Lançar remédio ou vacina</button></div>`}</div>`;
+};
+let SEL_VACAS=[];
+function formTratamento(id, animalId){
+  const t=id?tratamentos.find(x=>x.id===id):{data:hoje(), vacas:animalId?[animalId]:[], caixa:true};
+  if(!t) return; SEL_VACAS=[...(t.vacas||[])];
+  abrirModal({titulo:id?'Editar remédio / vacina':'Remédio ou vacina', larg:'640px',
+    corpo:`<div class="fg">
+      <label class="field full"><span>Produto</span><input class="inp" name="prod" value="${esc(t.produto||'')}" list="sugProd" placeholder="Ex.: antibiótico, vermífugo, vacina aftosa" required></label>
+      <label class="field"><span>Data</span><input class="inp" type="date" name="data" value="${esc(t.data)}" required></label>
+      <label class="field"><span>Dose / como aplicou (opcional)</span><input class="inp" name="dose" value="${esc(t.dose||'')}" placeholder="Ex.: 20 ml, 3 dias"></label>
+      <label class="field"><span>Carência do leite (dias)</span><input class="inp num" name="car" inputmode="numeric" value="${int(t.carencia)||''}" placeholder="0 se não tem"></label>
+      <label class="field"><span>Valor pago (R$, opcional)</span><input class="inp num" name="valor" inputmode="decimal" value="${fmtInp(t.valor)}"></label>
+      <label class="field"><span>Onde comprou (opcional)</span><input class="inp" name="forn" value="${esc(t.fornecedor||'')}"></label>
+    </div>
+    <div class="field"><span style="display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px">Para quais animais</span>
+      <div class="tools" style="margin-bottom:6px"><button type="button" class="btn sm sec" onclick="selVacas('lactacao')">Todas em lactação</button><button type="button" class="btn sm sec" onclick="selVacas('vacas')">Todas as vacas</button><button type="button" class="btn sm sec" onclick="selVacas('todos')">Rebanho todo</button><button type="button" class="btn sm ghost" onclick="selVacas('nenhum')">Limpar</button></div>
+      <div id="listaVacas" class="chips-sel"></div></div>
+    <label class="toggle"><input type="checkbox" name="caixa" ${t.caixa!==false?'checked':''}> Lançar o valor no fluxo de caixa</label>
+    ${campoAnexos(t.anexos)}
+    <datalist id="sugProd">${[...new Set(tratamentos.map(x=>x.produto))].map(p=>`<option value="${esc(p)}">`).join('')}</datalist>`,
+    extra:id?`<button type="button" class="btn danger" style="margin-right:auto" onclick="apagarTratamento('${id}')">${I.lixo}Apagar</button>`:'',
+    aoConfirmar:async f=>{
+      const o={...t, produto:f.prod.value.trim(), data:f.data.value, dose:f.dose.value.trim(), carencia:int(f.car.value), valor:num(f.valor.value), fornecedor:f.forn.value.trim(), vacas:[...SEL_VACAS], caixa:f.caixa.checked};
+      if(!o.produto||!o.data){ toast('Informe o produto e a data.',true); return false; }
+      try{ o.anexos=await salvarAnexos('tratamento'); }catch(e){ return false; }
+      if(!id) o.criado=Date.now();
+      await gravar('tratamentos',o); toast(id?'Atualizado':'Lançado'+(o.carencia&&o.vacas.length?` · carência até ${br(somaDias(o.data,o.carencia))}`:''));
+    }});
+  desenharSelVacas();
+}
+function selVacas(q){
+  const at=animais.filter(ativo);
+  SEL_VACAS = q==='nenhum'?[] : q==='lactacao'?at.filter(a=>a.categoria==='lactacao').map(a=>a.id) : q==='vacas'?at.filter(ehVaca).map(a=>a.id) : at.map(a=>a.id);
+  desenharSelVacas();
+}
+function desenharSelVacas(){
+  const el=$('listaVacas'); if(!el) return;
+  const ls=animais.filter(a=>ativo(a)||SEL_VACAS.includes(a.id)).sort(ordAnimal);
+  el.innerHTML=ls.length?ls.map(a=>`<label class="chip-sel ${SEL_VACAS.includes(a.id)?'on':''}"><input type="checkbox" ${SEL_VACAS.includes(a.id)?'checked':''} onchange="SEL_VACAS=this.checked?[...SEL_VACAS,'${a.id}']:SEL_VACAS.filter(x=>x!=='${a.id}');this.parentNode.classList.toggle('on',this.checked)">${esc(a.nome||a.brinco)}${a.nome&&a.brinco?` <small>${esc(a.brinco)}</small>`:''}</label>`).join(''):'<span class="muted" style="font-size:13px">Cadastre os animais primeiro.</span>';
+}
+function apagarTratamento(id){
+  const t=tratamentos.find(x=>x.id===id); if(!t) return;
+  confirmar('Apagar este lançamento?', `${esc(t.produto)} em ${br(t.data)}. Sai também do fluxo de caixa.`, 'Apagar', async()=>{ apagarAnexosDe(t.anexos); await apagarDoc('tratamentos',id); toast('Apagado'); });
+}
+
+/* ============================ CONTROLE LEITEIRO E BOOST ============================ */
+R.leite = () => {
+  const ps=[...pesagens].sort((a,b)=>b.data.localeCompare(a.data));
+  const c=cfg(), ultB=ps.find(p=>(p.itens||[]).some(i=>i.boost));
+  const ult=ps[0], ant=ps[1];
+  const ranking=ult?[...(ult.itens||[])].sort((a,b)=>b.litros-a.litros):[];
+  return `
+  <div class="head"><div><h1>Controle leiteiro e boost</h1><p>Duas vezes por mês, no dia do boost: anote quantos litros cada vaca deu e em quais aplicou.</p></div>
+    <div class="tools"><button class="btn" onclick="formPesagem()">${I.lancar}Dia do boost / pesar</button></div></div>
+  <div class="faixa">
+    <div><div class="l">Última pesagem</div><div class="v money">${ult?dec1(soma(ult.itens||[],i=>i.litros))+' L':'—'}</div><div class="s">${ult?br(ult.data)+' · '+(ult.itens||[]).length+' vaca(s)':''}</div></div>
+    <div><div class="l">Média por vaca</div><div class="v money">${ult&&(ult.itens||[]).length?dec1(soma(ult.itens,i=>i.litros)/ult.itens.length)+' L':'—'}</div>${ult&&ant&&(ant.itens||[]).length?`<div class="s">anterior: ${dec1(soma(ant.itens,i=>i.litros)/ant.itens.length)} L</div>`:''}</div>
+    <div><div class="l">Último boost</div><div class="v money" style="font-size:22px">${ultB?br(ultB.data):'—'}</div><div class="s">${ultB?(ultB.itens||[]).filter(i=>i.boost).length+' vaca(s)':''}</div></div>
+    <div><div class="l">Próximo boost</div><div class="v money" style="font-size:22px">${ultB?br(somaDias(ultB.data,c.boostDias)):'—'}</div><div class="s">a cada ${c.boostDias} dias</div></div>
+  </div>
+  ${ult?`<div class="panel"><div class="panel-h"><div><h2>Pesagem de ${br(ult.data)}</h2><p class="sub">Da vaca que mais deu leite para a que menos deu.</p></div><button class="btn sm sec" onclick="formPesagem('${ult.id}')">${I.editar}Editar</button></div>
+    <div class="tw"><table><thead><tr><th>Vaca</th><th class="n">Litros</th><th class="n hide-m">Anterior</th><th>Boost</th></tr></thead><tbody>
+    ${ranking.map(i=>{ const pa=ant&&(ant.itens||[]).find(x=>x.animalId===i.animalId); const d=pa?i.litros-pa.litros:null; return `<tr><td>${linkAnimal(i.animalId)}</td><td class="n money"><b>${dec1(i.litros)}</b>${d!==null&&d!==0?` <small class="${d>0?'pos':'neg'}">${d>0?'+':''}${dec1(d)}</small>`:''}</td><td class="n hide-m">${pa?dec1(pa.litros):'—'}</td><td>${i.boost?'<span class="tag t-ok">aplicado</span>':'<span class="muted">—</span>'}</td></tr>`; }).join('')}
+    </tbody><tfoot><tr><td>Total</td><td class="n">${dec1(soma(ult.itens||[],i=>i.litros))} L</td><td class="n hide-m">${ant?dec1(soma(ant.itens||[],i=>i.litros))+' L':''}</td><td>${(ult.itens||[]).filter(i=>i.boost).length} boost</td></tr></tfoot></table></div></div>`:''}
+  <div class="panel"><h2>Histórico</h2>
+    ${ps.length?`<div class="tw"><table><thead><tr><th>Dia</th><th class="n">Vacas</th><th class="n">Total</th><th class="n hide-m">Média</th><th class="n">Boost</th><th></th></tr></thead><tbody>
+    ${ps.map(p=>`<tr><td>${br(p.data)}</td><td class="n">${(p.itens||[]).length}</td><td class="n money">${dec1(soma(p.itens||[],i=>i.litros))} L</td><td class="n hide-m">${(p.itens||[]).length?dec1(soma(p.itens,i=>i.litros)/p.itens.length):'—'}</td><td class="n">${(p.itens||[]).filter(i=>i.boost).length}</td><td class="act"><button class="icon-btn" onclick="formPesagem('${p.id}')" title="Editar">${I.editar}</button><button class="icon-btn" onclick="apagarPesagem('${p.id}')" title="Apagar">${I.lixo}</button></td></tr>`).join('')}
+    </tbody></table></div>`:`<div class="vazio">Nenhuma pesagem ainda.<br><button class="btn" onclick="formPesagem()">Lançar o primeiro dia de boost</button></div>`}</div>`;
+};
+function formPesagem(id){
+  const p=id?pesagens.find(x=>x.id===id):{data:hoje(), itens:[]};
+  if(!p) return;
+  const car=carenciasAtivas(p.data);
+  const vacas=animais.filter(a=>(ativo(a)&&a.categoria==='lactacao')||(p.itens||[]).some(i=>i.animalId===a.id)).sort(ordAnimal);
+  abrirModal({titulo:id?'Editar pesagem':'Dia do boost / pesar leite', larg:'620px',
+    desc:'Digite os litros de cada vaca. Deixe em branco a vaca que não foi pesada. A caixa “boost” já vem marcada.',
+    corpo:`<label class="field"><span>Dia</span><input class="inp" type="date" name="data" value="${esc(p.data)}" required></label>
+    ${vacas.length?`<div class="tools" style="margin:10px 0 0"><button type="button" class="btn sm ghost" onclick="document.querySelectorAll('#tabPes input[type=checkbox]').forEach(c=>c.checked=true)">Marcar boost em todas</button><button type="button" class="btn sm ghost" onclick="document.querySelectorAll('#tabPes input[type=checkbox]').forEach(c=>c.checked=false)">Desmarcar todas</button></div>
+    <div class="tw"><table class="prev" id="tabPes"><thead><tr><th>Vaca</th><th class="n">Litros</th><th>Boost</th></tr></thead><tbody>
+    ${vacas.map(a=>{ const it=(p.itens||[]).find(i=>i.animalId===a.id), c=car.find(x=>x.animalId===a.id); return `<tr data-id="${a.id}"><td>${rotulo(a)}${c?` <span class="tag t-bad">carência até ${brCurto(c.fim)}</span>`:''}</td><td class="n"><input class="inp num" inputmode="decimal" style="width:90px" value="${it?fmtLitros(it.litros):''}"></td><td><label style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" class="chk" ${!id||(it&&it.boost)?'checked':''}> boost</label></td></tr>`; }).join('')}
+    </tbody></table></div>`:'<div class="vazio">Nenhuma vaca em lactação cadastrada. Cadastre as vacas no Rebanho com a categoria “Vaca em lactação”.</div>'}`,
+    aoConfirmar:async f=>{
+      if(!f.data.value){ toast('Informe o dia.',true); return false; }
+      const itens=[...document.querySelectorAll('#tabPes tbody tr')].map(tr=>({animalId:tr.dataset.id, litros:num(tr.querySelector('input.num').value), boost:tr.querySelector('input[type=checkbox]').checked})).filter(i=>i.litros>0||i.boost);
+      if(!itens.length){ toast('Anote os litros de pelo menos uma vaca.',true); return false; }
+      if(!id && pesagens.some(x=>x.data===f.data.value)){ toast('Já existe pesagem neste dia. Edite a que já está lançada.',true); return false; }
+      await gravar('pesagens',{...p, data:f.data.value, itens, criado:p.criado||Date.now()});
+      toast(`Pesagem salva · ${dec1(soma(itens,i=>i.litros))} L · ${itens.filter(i=>i.boost).length} boost`);
+    }});
+}
+function apagarPesagem(id){
+  const p=pesagens.find(x=>x.id===id); if(!p) return;
+  confirmar('Apagar a pesagem de '+br(p.data)+'?','Os litros de todas as vacas desse dia saem do sistema.','Apagar',async()=>{ await apagarDoc('pesagens',id); toast('Pesagem apagada'); });
+}
+
+/* ============================ FOLHA DO LEITE ============================ */
+R.folha = () => {
+  const ym=V.mes, f=calcFolha(ym);
+  const ant=calcFolha(somaMes(ym,-1));
+  if(!f) return `
+  <div class="head"><div><h1>Folha do leite</h1><p>Fechamento do mês: valor bruto do laticínio, repasses aos parceiros que entregam no nome do seu pai e descontos que vêm na folha.</p></div><div class="tools">${seletorMes()}</div></div>
+  <div class="panel"><div class="vazio">Nenhuma folha lançada para ${mesNome(ym)}.<br><button class="btn" onclick="formFolha()">Lançar a folha de ${MESES[+ym.slice(5)-1]}</button>${ant?`<div class="ajuda" style="margin-top:10px">Os parceiros, preços e descontos fixos vêm da folha de ${MESES[+ant.ref.slice(5)-1]} para você só ajustar.</div>`:''}</div></div>`;
+  const ln=(a,b,cls)=>`<div class="ln"><span>${a}</span><span class="money ${cls||''}">${b}</span></div>`;
+  return `
+  <div class="head"><div><h1>Folha do leite</h1><p>Leite produzido em ${mesNome(ym)}${f.dataRecebimento?`, recebido em ${br(f.dataRecebimento)}`:''}.</p></div>
+    <div class="tools">${seletorMes()}<button class="btn sec" onclick="pdfFolha()">${I.pdf}PDF da folha</button><button class="btn" onclick="formFolha()">${I.editar}Editar folha</button></div></div>
+  <div class="faixa">
+    <div><div class="l">Valor bruto</div><div class="v money">${brl(f.bruto)}</div><div class="s">${f.litros?inteiro(f.litros)+' L':''}${f.precoMedio?' · '+brl(f.precoMedio)+'/L':''}</div></div>
+    <div><div class="l">Descontos da folha</div><div class="v money neg">${brl(f.totDesc)}</div><div class="s">${f.descontos.length} item(ns)</div></div>
+    <div><div class="l">Repasses aos parceiros</div><div class="v money neg">${brl(f.totRep)}</div><div class="s">${inteiro(f.litrosParc)} L</div></div>
+    <div><div class="l">Líquido do seu pai</div><div class="v money ${f.liquidoPai<0?'neg':'pos'}">${brl(f.liquidoPai)}</div><div class="s">${f.litros?inteiro(f.litrosPai)+' L dele':''}</div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h2>Resumo</h2>
+      ${ln('Valor bruto do laticínio',brl(f.bruto))}
+      ${f.descontos.map(d=>ln(`${esc(d.desc||'Desconto')}${d.recebidoEm?` <span class="muted">(adiantado em ${brCurto(d.recebidoEm)})</span>`:''}`,'−'+brl(d.valor),'neg')).join('')}
+      ${ln('<b>Recebido do laticínio</b>','<b>'+brl(f.recebido)+'</b>')}
+      ${f.parceiros.map(x=>ln(`Repasse ${esc(parc(x.parceiroId).nome)} <span class="muted">(${inteiro(x.litros)} L × ${brl(x.preco)})</span>`,'−'+brl(x.valor),'neg')).join('')}
+      <div class="ln tot"><span>Líquido do seu pai</span><span class="money">${brl(f.liquidoPai)}</span></div>
+      ${f.obs?`<div class="ajuda" style="margin-top:8px">${esc(f.obs)}</div>`:''}${(f.anexos||[]).length?`<div style="margin-top:8px">${clipBtn(f.anexos)} documentos da folha</div>`:''}
+    </div>
+    <div class="panel"><h2>Parceiros</h2><p class="sub">Quanto cada um recebe e quando.</p>
+      ${f.parceiros.length?`<div class="tw"><table><thead><tr><th>Parceiro</th><th class="n hide-m">Litros</th><th class="n">Valor</th><th></th></tr></thead><tbody>${f.parceiros.map(x=>`<tr><td><b>${esc(parc(x.parceiroId).nome)}</b><div class="muted" style="font-size:12px">${inteiro(x.litros)} L × ${brl(x.preco)} · paga ${br(x.dataPagamento||f.dataRecebimento)}</div></td><td class="n hide-m">${inteiro(x.litros)}</td><td class="n money">${brl(x.valor)}</td><td class="act"><button class="btn sm sec" onclick="pdfParceiro('${x.parceiroId}')">${I.pdf}PDF</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="vazio">Nenhum parceiro nesta folha.</div>'}
+    </div>
+  </div>`;
+};
+let FOLHA=null;
+function formFolha(){
+  const ym=V.mes, atual=cad.folhas[ym], ant=cad.folhas[somaMes(ym,-1)];
+  const base=atual?JSON.parse(JSON.stringify(atual)):{
+    litros:'', preco:'', bruto:'', dataRecebimento:'', obs:'',
+    parceiros:cad.parceiros.filter(p=>p.ativo!==false).map(p=>{ const pa=ant&&(ant.parceiros||[]).find(x=>x.parceiroId===p.id); return {parceiroId:p.id, litros:'', preco:pa?pa.preco:p.preco, dataPagamento:''}; }),
+    descontos:ant?(ant.descontos||[]).filter(d=>d.fixo).map(d=>({id:uid(), desc:d.desc, valor:d.valor, fixo:true})):[] };
+  FOLHA=base;
+  abrirModal({titulo:`Folha do leite · ${mesNome(ym)}`, larg:'820px',
+    desc:'Copie os números da folha do laticínio. Os repasses são calculados: litros do parceiro × preço que vocês decidiram.',
+    corpo:`<div class="fg3">
+      <label class="field"><span>Litros do mês (total da folha)</span><input class="inp num" name="litros" inputmode="decimal" value="${fmtLitros(base.litros)}" oninput="calcBrutoFolha()"></label>
+      <label class="field"><span>Preço por litro (folha)</span><input class="inp num" name="preco" inputmode="decimal" value="${fmtPreco(base.preco)}" oninput="calcBrutoFolha()"></label>
+      <label class="field"><span>Valor bruto (R$)</span><input class="inp num" name="bruto" inputmode="decimal" value="${fmtInp(base.bruto)}" oninput="this.dataset.mexeu=1;previaFolha()"></label>
+      <label class="field"><span>Data do recebimento</span><input class="inp" type="date" name="receb" value="${esc(base.dataRecebimento||'')}" oninput="previaFolha()"></label>
+      <label class="field full" style="grid-column:span 2"><span>Observação</span><input class="inp" name="obs" value="${esc(base.obs||'')}"></label>
+    </div>
+    <div class="bloco-t" style="margin-top:18px">Parceiros que entregam no nome do seu pai</div>
+    <div id="fParc"></div>
+    ${cad.parceiros.length?'':`<div class="ajuda">Nenhum parceiro cadastrado. Cadastre em <button type="button" class="link" onclick="fecharModal();ir('cadastros')">Parceiros e sêmen</button>.</div>`}
+    <div class="bloco-t" style="margin-top:18px">Descontos que vêm na folha</div>
+    <div id="fDesc"></div>
+    <button type="button" class="btn sm sec" style="margin-top:8px" onclick="FOLHA.descontos.push({id:uid(),desc:'',valor:'',fixo:false});desenharFolha()">${I.lancar}Adicionar desconto</button>
+    <datalist id="sugDescFolha"><option value="Ração Calp"><option value="Adiantamento"><option value="Funrural / INSS"><option value="Frete do leite"><option value="Sal mineral"><option value="Taxa da cooperativa"></datalist>
+    <div id="fPrev" style="margin-top:16px"></div>
+    ${campoAnexos(base.anexos)}`,
+    extra:atual?`<button type="button" class="btn danger" style="margin-right:auto" onclick="apagarFolha('${ym}')">${I.lixo}Apagar folha</button>`:'',
+    aoConfirmar:async f=>{
+      lerFolhaDoForm();
+      if(!(num(FOLHA.bruto)>0)){ toast('Informe o valor bruto (ou litros e preço).',true); return false; }
+      if(FOLHA.descontos.some(d=>!String(d.desc).trim()&&num(d.valor))){ toast('Escreva a descrição de cada desconto.',true); return false; }
+      try{ FOLHA.anexos=await salvarAnexos('folha'); }catch(e){ return false; }
+      FOLHA.parceiros=FOLHA.parceiros.filter(x=>num(x.litros)>0).map(x=>({parceiroId:x.parceiroId, litros:num(x.litros), preco:num(x.preco), dataPagamento:x.dataPagamento||''}));
+      FOLHA.descontos=FOLHA.descontos.filter(d=>String(d.desc).trim()||num(d.valor)).map(d=>({id:d.id||uid(), desc:String(d.desc).trim(), valor:num(d.valor), fixo:!!d.fixo, recebidoEm:d.recebidoEm||''}));
+      cad.folhas[ym]={...FOLHA, litros:num(FOLHA.litros), preco:num(FOLHA.preco), bruto:num(FOLHA.bruto)};
+      FOLHA.parceiros.forEach(x=>{ const p=cad.parceiros.find(y=>y.id===x.parceiroId); if(p&&x.preco) p.preco=x.preco; });
+      salvar(); toast('Folha de '+mesNome(ym)+' salva');
+    }});
+  desenharFolha();
+}
+function desenharFolha(){
+  const P=$('fParc'), D=$('fDesc'); if(!P||!FOLHA) return;
+  P.innerHTML=FOLHA.parceiros.length?`<div class="tw"><table class="prev"><thead><tr><th>Parceiro</th><th class="n">Litros</th><th class="n">Preço/L que vocês pagam</th><th>Pagar em</th><th class="n">Valor</th></tr></thead><tbody>${FOLHA.parceiros.map((x,i)=>`<tr>
+    <td><b>${esc(parc(x.parceiroId).nome)}</b></td>
+    <td><input class="inp num" inputmode="decimal" style="width:90px" value="${fmtLitros(x.litros)}" oninput="FOLHA.parceiros[${i}].litros=this.value;previaFolha()"></td>
+    <td><input class="inp num" inputmode="decimal" style="width:100px" value="${fmtPreco(x.preco)}" oninput="FOLHA.parceiros[${i}].preco=this.value;previaFolha()"></td>
+    <td><input class="inp" type="date" style="width:145px" value="${esc(x.dataPagamento||'')}" oninput="FOLHA.parceiros[${i}].dataPagamento=this.value" title="Vazio = mesmo dia do recebimento"></td>
+    <td class="n money" id="fpv${i}">${brl(num(x.litros)*num(x.preco))}</td></tr>`).join('')}</tbody></table></div><div class="ajuda">“Pagar em” vazio = mesmo dia do recebimento do laticínio. Parceiro sem litros não entra na folha.</div>`:'';
+  D.innerHTML=FOLHA.descontos.map((d,i)=>`<div class="benrow" style="grid-template-columns:1.6fr 1fr 1.2fr auto 32px">
+    <label><span>Descrição</span><input class="inp" list="sugDescFolha" value="${esc(d.desc||'')}" oninput="FOLHA.descontos[${i}].desc=this.value"></label>
+    <label><span>Valor (R$)</span><input class="inp num" inputmode="decimal" value="${fmtInp(d.valor)}" oninput="FOLHA.descontos[${i}].valor=this.value;previaFolha()"></label>
+    <label><span>Adiantamento recebido em</span><input class="inp" type="date" value="${esc(d.recebidoEm||'')}" oninput="FOLHA.descontos[${i}].recebidoEm=this.value" title="Só para adiantamento: entra no caixa nesse dia"></label>
+    <label style="align-self:center;display:flex;gap:6px;align-items:center;font-size:12px;margin-top:16px"><input type="checkbox" ${d.fixo?'checked':''} onchange="FOLHA.descontos[${i}].fixo=this.checked"> todo mês</label>
+    <button type="button" class="icon-btn" title="Remover" onclick="FOLHA.descontos.splice(${i},1);desenharFolha()">${I.lixo}</button></div>`).join('')||'<div class="muted" style="font-size:13px">Nenhum desconto.</div>';
+  previaFolha();
+}
+function calcBrutoFolha(){ const f=$('mform'); if(!f) return; if(!f.bruto.dataset.mexeu){ const v=num(f.litros.value)*num(f.preco.value); f.bruto.value=v?fmtInp(r2(v)):''; } previaFolha(); }
+function lerFolhaDoForm(){ const f=$('mform'); FOLHA.litros=f.litros.value; FOLHA.preco=f.preco.value; FOLHA.bruto=f.bruto.value; FOLHA.dataRecebimento=f.receb.value; FOLHA.obs=f.obs.value.trim(); }
+function previaFolha(){
+  const el=$('fPrev'); if(!el) return; lerFolhaDoForm();
+  FOLHA.parceiros.forEach((x,i)=>{ const c=$('fpv'+i); if(c) c.textContent=brl(num(x.litros)*num(x.preco)); });
+  const bruto=num(FOLHA.bruto), desc=soma(FOLHA.descontos,d=>num(d.valor)), rep=soma(FOLHA.parceiros,x=>num(x.litros)*num(x.preco));
+  el.innerHTML=`<div class="ajustes"><div class="ln"><span>Valor bruto</span><span class="money">${brl(bruto)}</span></div><div class="ln"><span>− Descontos da folha</span><span class="money neg">${brl(desc)}</span></div><div class="ln"><span>= Recebido do laticínio</span><span class="money">${brl(bruto-desc)}</span></div><div class="ln"><span>− Repasses aos parceiros</span><span class="money neg">${brl(rep)}</span></div><div class="ln tot"><span>Líquido do seu pai</span><span class="money">${brl(r2(bruto-desc-rep))}</span></div></div>`;
+}
+function apagarFolha(ym){ confirmar('Apagar a folha de '+mesNome(ym)+'?','Os repasses e o recebimento dessa folha saem do fluxo de caixa.','Apagar',()=>{ apagarAnexosDe((cad.folhas[ym]||{}).anexos); delete cad.folhas[ym]; salvar(); toast('Folha apagada'); }); }
+function pdfBase(titulo){
+  const {jsPDF}=window.jspdf, doc=new jsPDF({unit:'mm',format:'a4'}), PW=210, ML=18, MR=192;
+  doc.setFillColor(28,58,38); doc.rect(0,0,PW,26,'F'); doc.setTextColor(255,255,255);
+  doc.setFont('times','bold'); doc.setFontSize(18); doc.text('Roça',ML,15); doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.text('Leite e rebanho',ML,20.5);
+  doc.setFontSize(10); doc.text(tira(titulo),MR,15,{align:'right'});
+  return {doc, ML, MR, PW};
+}
+const tira = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g,'');
+const realPdf = v => 'R$ '+(Number(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+function pdfParceiro(pid){
+  if(!window.jspdf){ toast('O gerador de PDF ainda não carregou. Tente de novo.',true); return; }
+  const f=calcFolha(V.mes), x=f&&f.parceiros.find(p=>p.parceiroId===pid); if(!x) return;
+  const {doc,ML,MR,PW}=pdfBase('Leite de '+mesNome(V.mes)); let y=40; const nome=parc(pid).nome;
+  doc.setTextColor(23,36,47); doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.text(tira(nome),ML,y); y+=12;
+  const ln=(a,b,bold)=>{ doc.setFont('helvetica',bold?'bold':'normal'); doc.setFontSize(bold?12:10); doc.setTextColor(40,50,60); doc.text(tira(a),ML,y); doc.text(tira(b),MR,y,{align:'right'}); doc.setDrawColor(226,231,235); doc.line(ML,y+2,MR,y+2); y+=8; };
+  ln('Mes do leite',mesNome(V.mes)); ln('Litros entregues',inteiro(x.litros)+' L'); ln('Preco por litro',realPdf(x.preco)); ln('Data do pagamento',br(x.dataPagamento||f.dataRecebimento));
+  y+=2; doc.setFillColor(229,240,232); doc.rect(ML,y-5,MR-ML,11,'F'); ln('Valor a receber',realPdf(x.valor),true);
+  y+=24; doc.setDrawColor(23,36,47); doc.line(ML,y,ML+70,y); doc.line(MR-70,y,MR,y); doc.setFontSize(8.5); doc.setTextColor(100,110,120); doc.text('Pagador',ML,y+5); doc.text(tira(nome),MR-70,y+5); doc.text('Emitido em '+br(hoje()),PW/2,y+14,{align:'center'});
+  doc.save('leite_'+tira(nome).toLowerCase().replace(/\s+/g,'_')+'_'+V.mes+'.pdf'); toast('PDF baixado');
+}
+function pdfFolha(){
+  if(!window.jspdf){ toast('O gerador de PDF ainda não carregou. Tente de novo.',true); return; }
+  const f=calcFolha(V.mes); if(!f) return;
+  const {doc,ML,MR}=pdfBase('Folha do leite · '+mesNome(V.mes)); let y=40;
+  const ln=(a,b,neg,bold)=>{ doc.setFont('helvetica',bold?'bold':'normal'); doc.setFontSize(bold?12:10); doc.setTextColor(40,50,60); doc.text(tira(a),ML,y); doc.setTextColor(neg?178:23,neg?58:36,neg?72:47); doc.text((neg?'- ':'')+realPdf(b),MR,y,{align:'right'}); doc.setDrawColor(226,231,235); doc.line(ML,y+2,MR,y+2); y+=7.5; };
+  doc.setTextColor(100,110,120); doc.setFontSize(9); doc.text(tira(`${inteiro(f.litros)} L no mes${f.precoMedio?' · '+realPdf(f.precoMedio)+'/L':''}${f.dataRecebimento?' · recebido em '+br(f.dataRecebimento):''}`),ML,y); y+=9;
+  ln('Valor bruto',f.bruto); f.descontos.forEach(d=>ln(d.desc||'Desconto',d.valor,true)); ln('Recebido do laticinio',f.recebido,false,true);
+  f.parceiros.forEach(x=>ln(`Repasse ${parc(x.parceiroId).nome} (${inteiro(x.litros)} L x ${realPdf(x.preco)})`,x.valor,true));
+  y+=2; doc.setFillColor(229,240,232); doc.rect(ML,y-5,MR-ML,11,'F'); ln('Liquido',f.liquidoPai,false,true);
+  doc.save('folha_leite_'+V.mes+'.pdf'); toast('PDF baixado');
+}
+
+/* ============================ CADASTROS ============================ */
+R.cadastros = () => {
+  const c=cfg();
+  return `
+  <div class="head"><div><h1>Parceiros e sêmen</h1><p>Quem entrega leite no nome do seu pai, touros/sêmen usados e ajustes de prazos.</p></div></div>
+  <div class="grid2">
+    <div class="panel"><div class="panel-h"><div><h2>Parceiros do leite</h2><p class="sub">O preço por litro é sugerido na folha de cada mês.</p></div><button class="btn sm" onclick="formParceiro()">${I.lancar}Novo</button></div>
+      ${cad.parceiros.length?`<div class="tw"><table><tbody>${cad.parceiros.map(p=>`<tr><td><b>${esc(p.nome)}</b>${p.ativo===false?' <span class="tag t-mut">inativo</span>':''}${p.obs?`<div class="muted" style="font-size:12px">${esc(p.obs)}</div>`:''}</td><td class="n">${num(p.preco)?brl(p.preco)+'/L':'<span class="muted">sem preço</span>'}</td><td class="act"><button class="icon-btn" onclick="formParceiro('${p.id}')">${I.editar}</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="vazio">Nenhum parceiro cadastrado.</div>'}
+    </div>
+    <div class="panel"><div class="panel-h"><div><h2>Touros e sêmen</h2><p class="sub">Aparecem como sugestão na inseminação. Touros do rebanho são cadastrados no Rebanho.</p></div><button class="btn sm" onclick="formSemen()">${I.lancar}Novo</button></div>
+      ${cad.semens.length?`<div class="tw"><table><tbody>${cad.semens.map(s=>`<tr><td><b>${esc(s.nome)}</b>${s.raca?` · ${esc(s.raca)}`:''}${s.obs?`<div class="muted" style="font-size:12px">${esc(s.obs)}</div>`:''}</td><td class="n">${eventos.filter(e=>e.paiNome===s.nome).length} uso(s)</td><td class="act"><button class="icon-btn" onclick="formSemen('${s.id}')">${I.editar}</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="vazio">Nenhum sêmen cadastrado.</div>'}
+    </div>
+  </div>
+  <div class="panel"><div class="panel-h"><div><h2>Prazos</h2><p class="sub">Usados nas previsões e alertas.</p></div><button class="btn sm sec" onclick="formConfig()">${I.editar}Mudar</button></div>
+    <div class="ln"><span>Gestação (dias entre inseminação e parto)</span><b>${c.gestacao}</b></div><div class="ln"><span>Secar antes do parto (dias)</span><b>${c.secagem}</b></div><div class="ln"><span>Avisar diagnóstico depois de (dias)</span><b>${c.diagDias}</b></div><div class="ln"><span>Intervalo do boost (dias)</span><b>${c.boostDias}</b></div>
+  </div>`;
+};
+function formParceiro(id){
+  const p=id?cad.parceiros.find(x=>x.id===id):{nome:'',preco:0,ativo:true};
+  abrirModal({titulo:id?'Editar parceiro':'Novo parceiro', desc:'Pessoa que entrega leite no nome do seu pai.',
+    corpo:`<label class="field"><span>Nome</span><input class="inp" name="nome" value="${esc(p.nome)}" required></label>
+    <label class="field"><span>Preço por litro que vocês pagam (R$)</span><input class="inp num" name="preco" inputmode="decimal" value="${fmtPreco(p.preco)}"></label>
+    <label class="field"><span>Observação</span><input class="inp" name="obs" value="${esc(p.obs||'')}"></label>
+    <label class="toggle"><input type="checkbox" name="ativo" ${p.ativo!==false?'checked':''}> Ativo (entra nas próximas folhas)</label>`,
+    aoConfirmar:f=>{ const nome=f.nome.value.trim(); if(!nome){ toast('Digite o nome.',true); return false; }
+      const o={nome, preco:num(f.preco.value), obs:f.obs.value.trim(), ativo:f.ativo.checked};
+      if(id) Object.assign(cad.parceiros.find(x=>x.id===id)||p,o); else cad.parceiros.push({id:uid(),...o}); salvar(); toast('Parceiro salvo'); }});
+}
+function formSemen(id){
+  const s=id?cad.semens.find(x=>x.id===id):{nome:''};
+  abrirModal({titulo:id?'Editar touro / sêmen':'Novo touro / sêmen',
+    corpo:`<label class="field"><span>Nome do touro / sêmen</span><input class="inp" name="nome" value="${esc(s.nome)}" required></label><label class="field"><span>Raça (opcional)</span><input class="inp" name="raca" value="${esc(s.raca||'')}"></label><label class="field"><span>Observação</span><input class="inp" name="obs" value="${esc(s.obs||'')}"></label>`,
+    extra:id?`<button type="button" class="btn danger" style="margin-right:auto" onclick="cad.semens=cad.semens.filter(x=>x.id!=='${id}');salvar();fecharModal();toast('Removido')">${I.lixo}Remover</button>`:'',
+    aoConfirmar:f=>{ const nome=f.nome.value.trim(); if(!nome){ toast('Digite o nome.',true); return false; } const o={nome, raca:f.raca.value.trim(), obs:f.obs.value.trim()};
+      if(id) Object.assign(cad.semens.find(x=>x.id===id)||s,o); else cad.semens.push({id:uid(),...o}); salvar(); toast('Salvo'); }});
+}
+function formConfig(){
+  const c=cfg();
+  abrirModal({titulo:'Prazos',
+    corpo:`<div class="fg"><label class="field"><span>Gestação (dias)</span><input class="inp num" name="g" inputmode="numeric" value="${c.gestacao}"></label><label class="field"><span>Secar antes do parto (dias)</span><input class="inp num" name="s" inputmode="numeric" value="${c.secagem}"></label><label class="field"><span>Avisar diagnóstico depois de (dias)</span><input class="inp num" name="d" inputmode="numeric" value="${c.diagDias}"></label><label class="field"><span>Intervalo do boost (dias)</span><input class="inp num" name="b" inputmode="numeric" value="${c.boostDias}"></label></div>`,
+    aoConfirmar:f=>{ const g=int(f.g.value), s=int(f.s.value), d=int(f.d.value), b=int(f.b.value); if(g<250||g>310){ toast('Gestação entre 250 e 310 dias.',true); return false; } cad.config={gestacao:g, secagem:s||60, diagDias:d||35, boostDias:b||14}; salvar(); toast('Prazos salvos'); }});
+}
+
+/* ============================ MINHA CONTA ============================ */
+R.conta = () => `
+  <div class="head"><div><h1>Minha conta</h1><p>Senha, cópia de segurança e saída.</p></div></div>
+  <div class="panel"><h2>Conta</h2><p class="sub">${esc(auth.currentUser?auth.currentUser.email:'')}</p>
+    <div class="tools"><button class="btn sec" onclick="trocarSenha()">Trocar senha por e-mail</button><button class="btn danger" onclick="sair()">Sair</button></div></div>
+  <div class="panel"><h2>Cópia de segurança</h2><p class="sub">Baixa um arquivo com o rebanho, eventos, remédios, pesagens, folhas e caixa (sem as fotos). Guarde uma vez por mês.</p>
+    <button class="btn" onclick="baixarBackup()">${I.pdf}Baixar cópia</button></div>`;
+function baixarBackup(){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify({gerado:new Date().toISOString(), geral:cad, animais, eventos, tratamentos, pesagens},null,1)],{type:'application/json'})); a.download='roca-'+hoje()+'.json'; a.click(); toast('Cópia baixada'); }
+async function trocarSenha(){ try{ await auth.sendPasswordResetEmail(auth.currentUser.email); toast('Enviamos o link para '+auth.currentUser.email); }catch(e){ toast('Não foi possível enviar o e-mail.',true); } }
+
+/* ============================ FLUXO DE CAIXA ============================
+   Saldo inicial do mês + entradas − saídas, em ordem de data,
+   com o saldo dia a dia para ver quando o dinheiro fica curto.
+   ======================================================================= */
+/* Lançamentos automáticos do caixa (calculados, não ficam gravados):
+   - recebimento do leite (bruto − descontos da folha) na data de recebimento
+   - repasse de cada parceiro na data de pagamento
+   - adiantamentos recebidos do laticínio
+   - remédios com valor, na data da compra */
+function caixaAuto(ym, incluirOcultos){
+  const ocultos=cad.caixa.ocultos||{};
+  // ajustes feitos direto no caixa: mudam só o valor/dia no fluxo, não o holerite
+  const aj=cad.caixa.ajustes||{};
+  const todos=caixaAutoTodos(ym).map(l=>{ const a=aj[l.id]; if(!a) return l;
+    return {...l, valorHolerite:l.valor, dataOriginal:l.data, valor:a.valor!=null?num(a.valor):l.valor, data:a.data&&noMes(a.data,ym)?a.data:l.data, ajustado:true, obsAjuste:a.obs||''}; });
+  return incluirOcultos?todos:todos.filter(l=>!ocultos[l.id]);
+}
+const refTxt = ref => `${MESES[+ref.slice(5)-1].slice(0,3)}/${ref.slice(2,4)}`;
+function caixaAutoTodos(ym){
+  const pagos=cad.caixa.pagosAuto||{}, out=[];
+  const p=(key, def)=>pagos[key]!==undefined?!!pagos[key]:def;
+  Object.keys(cad.folhas).forEach(ref=>{ const f=calcFolha(ref); if(!f) return;
+    if(f.dataRecebimento&&noMes(f.dataRecebimento,ym)&&f.recebido>0){ const key='lei:'+ref;
+      out.push({id:key, auto:'leite', ref, tipo:'entrada', data:f.dataRecebimento, desc:`Leite ${refTxt(ref)} (folha: bruto − descontos)`, valor:f.recebido, pago:p(key,f.dataRecebimento<=hoje())}); }
+    f.parceiros.forEach(x=>{ const d=x.dataPagamento||f.dataRecebimento; if(!d||!noMes(d,ym)||!(x.valor>0)) return; const key='rep:'+ref+':'+x.parceiroId;
+      out.push({id:key, auto:'repasse', ref, parceiroId:x.parceiroId, tipo:'saida', data:d, desc:`Repasse ${parc(x.parceiroId).nome} (${refTxt(ref)} · ${inteiro(x.litros)} L)`, valor:x.valor, pago:p(key,false)}); });
+    f.descontos.forEach(dd=>{ if(!dd.recebidoEm||!noMes(dd.recebidoEm,ym)||!(num(dd.valor)>0)) return; const key='adi:'+ref+':'+dd.id;
+      out.push({id:key, auto:'adiantamento', ref, tipo:'entrada', data:dd.recebidoEm, desc:`${dd.desc||'Adiantamento'} (desconta na folha de ${refTxt(ref)})`, valor:num(dd.valor), pago:p(key,dd.recebidoEm<=hoje())}); });
+  });
+  tratamentos.filter(t=>t.caixa!==false&&num(t.valor)>0&&noMes(t.data,ym)).forEach(t=>{ const key='rem:'+t.id;
+    out.push({id:key, auto:'remedio', tratId:t.id, criado:tempo(t), tipo:'saida', data:t.data, desc:`Remédio: ${t.produto}${t.vacas&&t.vacas.length?' ('+t.vacas.map(id=>nomeAnimal(id)).join(', ')+')':''}`, valor:num(t.valor), pago:p(key,t.data<=hoje())}); });
+  return out;
+}
+function caixaMes(ym){
+  const C=cad.caixa, ini=C.saldos[ym];
+  const ls=[...C.lancs.filter(l=>noMes(l.data,ym)), ...caixaAuto(ym)].sort((a,b)=>a.data.localeCompare(b.data)||tempo(a)-tempo(b));
+  let saldo=num(ini), menor=null;
+  const linhas=ls.map(l=>{ saldo=r2(saldo+(l.tipo==='entrada'?1:-1)*num(l.valor)); if(menor===null||saldo<menor.saldo) menor={saldo,data:l.data}; return {...l, saldo}; });
+  const ent=r2(soma(ls.filter(l=>l.tipo==='entrada'),l=>l.valor)), sai=r2(soma(ls.filter(l=>l.tipo!=='entrada'),l=>l.valor));
+  const aPagar=r2(soma(ls.filter(l=>l.tipo!=='entrada'&&!l.pago),l=>l.valor));
+  return {temInicio:ini!==undefined&&ini!==null&&ini!=='', inicio:num(ini), linhas, ent, sai, aPagar, fim:r2(num(ini)+ent-sai), menor};
+}
+R.caixa = () => {
+  const ym=V.mes, c=caixaMes(ym), ant=somaMes(ym,-1), cAnt=caixaMes(ant);
+  const podePuxar=!c.temInicio && (cAnt.temInicio||cAnt.linhas.length);
+  const falta=c.menor && c.menor.saldo<0;
+  return `
+  <div class="head"><div><h1>Fluxo de caixa</h1><p>Quanto tinha no começo do mês, o que vai entrar e o que vai sair em cada dia. O saldo mostra quanto sobra depois de cada lançamento.</p></div>
+    <div class="tools">${seletorMes()}<button class="btn" onclick="formCaixa()">${I.lancar}Novo lançamento</button></div></div>
+  ${!c.temInicio?`<div class="aviso info"><div><b>Informe o saldo do começo do mês</b>Quanto tinha na conta no dia 1º de ${mesNome(ym)}. <button class="link" onclick="formSaldo()">Informar saldo inicial</button>${podePuxar?` · <button class="link" onclick="usarSaldoAnterior()">Usar o saldo final de ${MESES[+ant.slice(5)-1]} (${brl(cAnt.fim)})</button>`:''}</div></div>`:''}
+  ${falta?`<div class="aviso" style="background:var(--winebg);color:#6d1d27"><div><b>Vai faltar dinheiro em ${br(c.menor.data)}</b>O saldo chega a ${brl(c.menor.saldo)}. É preciso ter mais ${brl(-c.menor.saldo)} na conta até esse dia.</div></div>`:''}
+  <div class="faixa">
+    <div style="cursor:pointer" onclick="formSaldo()"><div class="l">Começou o mês com ${I.editar}</div><div class="v money">${c.temInicio?brl(c.inicio):'<span class="muted">—</span>'}</div><div class="s">toque para mudar</div></div>
+    <div><div class="l">Entradas</div><div class="v money pos">${brl(c.ent)}</div></div>
+    <div><div class="l">Saídas</div><div class="v money neg">${brl(c.sai)}</div><div class="s">${brl(r2(c.sai-c.aPagar))} pago · ${brl(c.aPagar)} a pagar</div></div>
+    <div><div class="l">Termina o mês com</div><div class="v money ${c.fim<0?'neg':''}">${brl(c.fim)}</div>${c.menor?`<div class="s">menor saldo: ${brl(c.menor.saldo)} em ${brCurto(c.menor.data)}</div>`:''}</div>
+  </div>
+  <div class="panel">${c.linhas.length?`<div class="tw"><table><thead><tr><th>Dia</th><th>Descrição</th><th class="n hide-m">Valor</th><th class="n">Saldo</th><th class="hide-m">Pago</th><th class="hide-m"></th></tr></thead><tbody>
+    <tr><td class="muted">01/${ym.slice(5)}</td><td class="muted">Começo do mês</td><td class="hide-m"></td><td class="n money">${brl(c.inicio)}</td><td class="hide-m"></td><td class="hide-m"></td></tr>
+    ${c.linhas.map(l=>`<tr${l.pago?' style="opacity:.6"':''}><td>${brCurto(l.data)}</td><td style="cursor:pointer" onclick="${l.auto?`abrirAuto('${l.id}')`:`formCaixa('${l.id}')`}">${esc(l.desc)}${vincTags(l)}${l.ref&&!l.auto?` <span class="tag t-mut">ref. ${refTxt(l.ref)}</span>`:''}${clipBtn(l.anexos)}${l.auto?` <span class="tag t-acc">${{leite:'da folha',repasse:'da folha',adiantamento:'da folha',remedio:'dos remédios'}[l.auto]}</span>`:''}${l.ajustado?` <span class="tag t-warn" title="Original: ${brl(l.valorHolerite)}">ajustado no caixa</span>`:''}${l.pago?` <span class="tag t-ok nc">${l.tipo==='entrada'?'recebido':'pago'}</span>`:''}${l.obsAjuste?`<div class="muted" style="font-size:12px">${esc(l.obsAjuste)}</div>`:''}<div class="mob money ${l.tipo==='entrada'?'pos':'neg'}" style="font-size:13px">${l.tipo==='entrada'?'+':'−'}${brl(l.valor)}</div></td>
+      <td class="n money hide-m ${l.tipo==='entrada'?'pos':'neg'}">${l.tipo==='entrada'?'+':'−'}${brl(l.valor)}</td>
+      <td class="n money ${l.saldo<0?'neg':''}"><b>${brl(l.saldo)}</b></td>
+      <td class="hide-m"><label style="display:inline-flex;gap:6px;align-items:center;cursor:pointer;font-size:13px"><input type="checkbox" class="chk" ${l.pago?'checked':''} onchange="marcarPago('${l.id}',this.checked)">${l.tipo==='entrada'?'recebido':'pago'}</label></td>
+      <td class="act hide-m">${l.auto?`<button class="icon-btn" title="Alterar no caixa" onclick="abrirAuto('${l.id}')">${I.editar}</button><button class="icon-btn" title="Tirar do caixa" onclick="tirarAuto('${l.id}')">${I.lixo}</button>`:`<button class="icon-btn" title="Editar" onclick="formCaixa('${l.id}')">${I.editar}</button><button class="icon-btn" title="Apagar" onclick="apagarCaixa('${l.id}')">${I.lixo}</button>`}</td></tr>`).join('')}
+    </tbody></table></div><div class="ajuda mob">Toque na descrição para editar, marcar como pago ou apagar (inclusive os automáticos).</div>`
+    :`<div class="vazio">Nenhum lançamento em ${mesNome(ym)}.<br><button class="btn" onclick="formCaixa()">Lançar uma conta a pagar ou a receber</button></div>`}
+  </div>
+  ${(()=>{ const o=cad.caixa.ocultos||{}, n=caixaAuto(ym,true).filter(l=>o[l.id]).length; return n?`<div class="ajuda" style="margin-top:10px">${n} lançamento(s) automático(s) tirado(s) deste mês. <button class="link" onclick="trazerAutos()">Trazer de volta</button></div>`:''; })()}
+  ${(()=>{ const g={}; const add=(k,nome,l)=>{ g[k]=g[k]||{nome, ent:0, sai:0}; g[k][l.tipo==='entrada'?'ent':'sai']+=num(l.valor); };
+    c.linhas.forEach(l=>{ const v=vincDe(l);
+      (v.animais||[]).forEach(a=>add('1:'+nomeAnimal(a), animalTag(a), l));
+      if(v.parceiroId) add('2:'+parc(v.parceiroId).nome, esc(parc(v.parceiroId).nome), l);
+      if(v.texto) add('3:'+v.texto.trim().toLowerCase(), esc(v.texto), l); });
+    const ks=Object.keys(g).sort(); if(!ks.length) return '';
+    return `<div class="panel"><h2>Por vaca, parceiro ou referência</h2><p class="sub">Lançamentos do mês ligados a uma vaca (inclui remédios), a um parceiro (inclui repasses) ou a outra referência.</p><div class="tw"><table><thead><tr><th>Referente a</th><th class="n hide-m">Entradas</th><th class="n hide-m">Saídas</th><th class="n">Resultado</th></tr></thead><tbody>
+      ${ks.map(k=>{ const x=g[k], res=r2(x.ent-x.sai); return `<tr><td>${x.nome}</td><td class="n money pos hide-m">${x.ent?brl(x.ent):'—'}</td><td class="n money neg hide-m">${x.sai?brl(x.sai):'—'}</td><td class="n money ${res<0?'neg':''}"><b>${brl(res)}</b></td></tr>`; }).join('')}</tbody></table></div></div>`; })()}
+  <div class="ajuda" style="margin-top:10px">Entram sozinhos: o leite recebido e os repasses aos parceiros (nas datas da folha do leite), os adiantamentos e os remédios com valor.</div>
+  ${C_manual(ym)?`<div class="tools" style="margin-top:12px"><button class="btn sm sec" onclick="copiarCaixa()">Copiar as contas deste mês para ${MESES[+somaMes(ym,1).slice(5)-1]}</button></div>`:''}`;
+};
+/* Vínculo opcional do lançamento do caixa: caminhão, motorista e/ou outra referência (aceita o formato antigo). */
+/* Vínculo opcional: vacas, parceiro e/ou outra referência. */
+function vincDe(l){
+  const o={...(l.vinc||{})};
+  if(l.auto==='remedio'){ const t=tratamentos.find(x=>x.id===l.tratId); if(t) o.animais=t.vacas||[]; }
+  if(l.auto==='repasse') o.parceiroId=l.parceiroId;
+  return o;
+}
+function vincTags(l){
+  const v=vincDe(l); let h='';
+  if(!l.auto) (v.animais||[]).forEach(a=>h+=' '+animalTag(a));
+  if(v.parceiroId && !l.auto) h+=` <span class="tag t-mut">${esc(parc(v.parceiroId).nome)}</span>`;
+  if(v.texto) h+=` <span class="tag t-acc">${esc(v.texto)}</span>`;
+  return h;
+}
+const C_manual = ym => cad.caixa.lancs.some(l=>noMes(l.data,ym));
+function formSaldo(){
+  const c=caixaMes(V.mes);
+  abrirModal({titulo:'Saldo do começo do mês', desc:`Quanto tinha na conta no dia 1º de ${mesNome(V.mes)}.`,
+    corpo:`<label class="field"><span>Saldo inicial (R$)</span><input class="inp num" name="v" inputmode="decimal" value="${c.temInicio?fmtInp(c.inicio)||'0,00':''}" required></label><div class="ajuda">Se a conta estava no negativo, coloque o sinal de menos. Ex.: -1.500,00</div>`,
+    aoConfirmar:f=>{ const t=f.v.value.trim(); if(!t){ toast('Informe o valor.',true); return false; } cad.caixa.saldos[V.mes]=num(t); salvar(); toast('Saldo inicial salvo'); }});
+}
+function usarSaldoAnterior(){ cad.caixa.saldos[V.mes]=caixaMes(somaMes(V.mes,-1)).fim; salvar(); toast('Saldo inicial salvo'); render(); }
+function formCaixa(id){
+  const l=id?cad.caixa.lancs.find(x=>x.id===id):{tipo:'saida', data:noMes(hoje(),V.mes)?hoje():V.mes+'-01', desc:'', valor:0, pago:V.mes<mesAtual()};
+  if(!l) return;
+  abrirModal({titulo:id?'Editar lançamento':'Novo lançamento no caixa',
+    corpo:`<input type="hidden" name="tipo" value="${l.tipo}">
+    <div class="seg" id="segCx" style="margin-top:8px"><button type="button" class="${l.tipo!=='entrada'?'on':''}" onclick="this.form.tipo.value='saida';[...this.parentNode.children].forEach(b=>b.classList.toggle('on',b===this))">Vou pagar</button><button type="button" class="${l.tipo==='entrada'?'on':''}" onclick="this.form.tipo.value='entrada';[...this.parentNode.children].forEach(b=>b.classList.toggle('on',b===this))">Vou receber</button></div>
+    <div class="fg">
+      <label class="field full"><span>Descrição</span><input class="inp" name="desc" value="${esc(l.desc)}" placeholder="Ex.: ração, energia, veterinário, venda de bezerro" required></label>
+      <label class="field"><span>Dia</span><input class="inp" type="date" name="data" value="${esc(l.data)}" required ${id?'':`onchange="this.form.pago.checked=this.value.slice(0,7)<mesAtual()"`}></label>
+      <label class="field"><span>Valor (R$)</span><input class="inp num" name="valor" inputmode="decimal" value="${fmtInp(l.valor)}" required></label>
+      ${(()=>{ const v=vincDe(l); return `
+      <label class="field"><span>Vaca / animal (opcional)</span><select class="inp" name="vAni"><option value="">—</option>${optsAnimais((v.animais||[])[0]||'')}</select></label>
+      <label class="field"><span>Parceiro (opcional)</span><select class="inp" name="vPar"><option value="">—</option>${optsParceiros(v.parceiroId||'')}</select></label>
+      <label class="field full"><span>Outra referência (opcional)</span><input class="inp" name="vTxt" value="${esc(v.texto||'')}" placeholder="Ex.: fazenda, cooperativa, aluguel"></label>`; })()}
+      <label class="field full"><span>Mês de referência (opcional)</span><input class="inp" type="month" name="ref" value="${esc(l.ref||'')}"><span class="ajuda" style="display:block;font-weight:400">Ex.: pago em novembro, referente a outubro.</span></label>
+    </div>
+    <label class="toggle"><input type="checkbox" name="pago" ${l.pago?'checked':''}> Já foi pago / recebido</label>
+    <div class="ajuda">Pode lançar contas de meses passados: o lançamento vai para o mês da data escolhida.</div>
+    ${campoAnexos(l.anexos)}`,
+    extra:id?`<button type="button" class="btn danger" style="margin-right:auto" onclick="apagarCaixa('${id}')">${I.lixo}Apagar</button>`:'',
+    aoConfirmar:async f=>{
+      const vinc={}; if(f.vAni.value) vinc.animais=[f.vAni.value]; if(f.vPar.value) vinc.parceiroId=f.vPar.value; if(f.vTxt.value.trim()) vinc.texto=f.vTxt.value.trim();
+      const o={tipo:f.tipo.value, desc:f.desc.value.trim(), data:f.data.value, valor:num(f.valor.value), pago:f.pago.checked, ref:f.ref.value||'', vinc:Object.keys(vinc).length?vinc:null};
+      if(!o.desc||!o.data){ toast('Preencha a descrição e o dia.',true); return false; }
+      if(o.valor<=0){ toast('Informe o valor.',true); return false; }
+      try{ o.anexos=await salvarAnexos('caixa'); }catch(e){ return false; }
+      if(id) Object.assign(cad.caixa.lancs.find(x=>x.id===id)||l,o); else cad.caixa.lancs.push({id:uid(), criado:Date.now(), ...o});
+      salvar();
+      if(!noMes(o.data,V.mes)){ V.mes=o.data.slice(0,7); toast('Lançado em '+mesNome(V.mes)); }
+      else toast(id?'Lançamento atualizado':'Lançamento salvo');
+    }});
+}
+function marcarPago(id,on){
+  if(/^(lei|rep|adi|rem):/.test(id)){ cad.caixa.pagosAuto=cad.caixa.pagosAuto||{}; cad.caixa.pagosAuto[id]=on; salvar(); render(); return; }
+  const l=cad.caixa.lancs.find(x=>x.id===id); if(!l) return; l.pago=on; salvar(); render(); }
+function abrirAuto(id){
+  const l=caixaAuto(V.mes).find(x=>x.id===id); if(!l) return;
+  const orig=l.ajustado?l.valorHolerite:l.valor;
+  const origem={leite:`folha do leite de ${mesNome(l.ref||V.mes)} (valor bruto − descontos)`, repasse:`repasse da folha do leite de ${mesNome(l.ref||V.mes)}`, adiantamento:`adiantamento lançado na folha de ${mesNome(l.ref||V.mes)}`, remedio:`remédio lançado em ${br(l.dataOriginal||l.data)}`}[l.auto];
+  const botao=l.auto==='remedio'?`<button type="button" class="btn sec" style="margin-right:auto" onclick="formTratamento('${l.tratId}')">Abrir remédio</button>`:`<button type="button" class="btn sec" style="margin-right:auto" onclick="fecharModal();ir('folha',{mes:'${l.ref}'})">Abrir folha</button>`;
+  abrirModal({titulo:esc(l.desc), ok:'Salvar no caixa',
+    desc:`Vem da ${origem}. Valor original: <b>${brl(orig)}</b>. Mudar o valor ou o dia aqui altera <b>só o fluxo de caixa</b>.`,
+    corpo:`<div class="fg">
+      <label class="field"><span>Valor (no caixa)</span><input class="inp num" name="valor" inputmode="decimal" value="${fmtInp(l.valor)}"></label>
+      <label class="field"><span>Dia (neste mês)</span><input class="inp" type="date" name="data" value="${l.data}" min="${V.mes}-01" max="${V.mes}-31"></label>
+      <label class="field full"><span>Observação (opcional)</span><input class="inp" name="obs" value="${esc(l.obsAjuste||'')}"></label></div>
+      <label class="toggle"><input type="checkbox" name="pago" ${l.pago?'checked':''}> ${l.tipo==='entrada'?'Já foi recebido':'Já foi pago'}</label>
+      ${l.ajustado?`<div class="aviso info" style="margin-top:14px;margin-bottom:0"><div><b>Valor ajustado no caixa</b>Original: ${brl(orig)} em ${br(l.dataOriginal)}. <button type="button" class="link" onclick="voltarAjuste('${l.id}')">Voltar ao valor original</button></div></div>`:''}`,
+    extra:botao,
+    extraFim:`<button type="button" class="btn danger" onclick="tirarAuto('${l.id}')">${I.lixo}Tirar do caixa</button>`,
+    aoConfirmar:f=>{
+      const v=num(f.valor.value), d=f.data.value;
+      if(v<=0){ toast('Informe o valor. Para não ter este lançamento, use “Tirar do caixa”.',true); return false; }
+      if(!d||!noMes(d,V.mes)){ toast('O dia tem que ser dentro de '+mesNome(V.mes)+'.',true); return false; }
+      cad.caixa.ajustes=cad.caixa.ajustes||{}; cad.caixa.pagosAuto=cad.caixa.pagosAuto||{};
+      const dataOrig=l.dataOriginal||l.data, obs=f.obs.value.trim();
+      if(r2(v)===r2(orig) && d===dataOrig && !obs) delete cad.caixa.ajustes[id];
+      else cad.caixa.ajustes[id]={valor:r2(v), data:d, obs};
+      cad.caixa.pagosAuto[id]=f.pago.checked;
+      salvar(); toast(r2(v)!==r2(orig)?'Valor alterado só no fluxo de caixa':'Salvo');
+    }});
+}
+function voltarAjuste(id){ if(cad.caixa.ajustes) delete cad.caixa.ajustes[id]; salvar(); fecharModal(); toast('Voltou ao valor original'); }
+function tirarAuto(id){
+  const l=caixaAuto(V.mes).find(x=>x.id===id); if(!l) return;
+  confirmar('Tirar do fluxo de caixa?', `${esc(l.desc)} · ${brl(l.valor)} em ${br(l.data)}. Sai só do fluxo de caixa: a folha do leite e os remédios não mudam. Dá para trazer de volta depois.`, 'Tirar do caixa', ()=>{
+    cad.caixa.ocultos=cad.caixa.ocultos||{}; cad.caixa.ocultos[id]=true; salvar(); toast('Tirado do fluxo de caixa'); });
+}
+function trazerAutos(){
+  const ocultos=cad.caixa.ocultos||{}, ls=caixaAuto(V.mes,true).filter(l=>ocultos[l.id]);
+  abrirModal({titulo:'Lançamentos automáticos tirados deste mês', ok:'Trazer de volta', desc:'Marque os que devem voltar para o fluxo de caixa.',
+    corpo:ls.map(l=>`<label class="toggle"><input type="checkbox" name="v" value="${l.id}"> ${brCurto(l.data)} · ${esc(l.desc)} · ${brl(l.valor)}</label>`).join(''),
+    aoConfirmar:f=>{ const ids=[...f.querySelectorAll('input[name=v]:checked')].map(i=>i.value); if(!ids.length){ toast('Marque pelo menos um.',true); return false; }
+      ids.forEach(i=>delete cad.caixa.ocultos[i]); salvar(); toast(ids.length+' lançamento(s) de volta ao caixa'); }});
+}
+function apagarCaixa(id){
+  const l=cad.caixa.lancs.find(x=>x.id===id); if(!l) return;
+  confirmar('Apagar este lançamento?', `${esc(l.desc)} · ${brl(l.valor)} em ${br(l.data)}.${(l.anexos||[]).length?' Os documentos anexados também serão apagados.':''}`, 'Apagar', ()=>{ apagarAnexosDe(l.anexos); cad.caixa.lancs=cad.caixa.lancs.filter(x=>x.id!==id); salvar(); toast('Lançamento apagado'); });
+}
+function copiarCaixa(){
+  const de=V.mes, para=somaMes(de,1), ls=cad.caixa.lancs.filter(l=>noMes(l.data,de));
+  const [y,m]=para.split('-').map(Number), ult=new Date(y,m,0).getDate();
+  confirmar(`Copiar ${ls.length} lançamento(s) para ${mesNome(para)}?`, 'Mesma descrição, mesmo dia e mesmo valor, ainda não pagos. Depois é só ajustar o que mudou.', 'Copiar', ()=>{
+    ls.forEach((l,i)=>cad.caixa.lancs.push({id:uid()+i, criado:Date.now()+i, tipo:l.tipo, desc:l.desc, valor:l.valor, pago:false, vinc:l.vinc||null, data:para+'-'+pad(Math.min(+l.data.slice(8),ult))}));
+    salvar(); V.mes=para; toast(`${ls.length} lançamento(s) copiados para ${mesNome(para)}`);
+  });
+}
+
+
+function comprimir(file){
+  return new Promise((ok,erro)=>{
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{
+      let w=img.naturalWidth, h=img.naturalHeight; const max=1600; if(Math.max(w,h)>max){ const k=max/Math.max(w,h); w=Math.round(w*k); h=Math.round(h*k); }
+      const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); URL.revokeObjectURL(url);
+      let q=0.72, out=c.toDataURL('image/jpeg',q); while(out.length>850000 && q>0.3){ q-=0.1; out=c.toDataURL('image/jpeg',q); }
+      ok(out);
+    };
+    img.onerror=erro; img.src=url;
+  });
+}
+
+/* ============================ ANEXOS ============================
+   Qualquer arquivo (PDF, foto, planilha…) até 8 MB. Fica no Firestore,
+   dividido em partes de ~900 KB (anexos/{id} + anexos_partes/{id}_{n}).
+   Fotos são comprimidas antes de enviar.
+   ================================================================ */
+const ANEXO_MAX=8*1024*1024, PARTE=900000;
+let ANX=null;
+function campoAnexos(lista){
+  ANX={lista:JSON.parse(JSON.stringify(lista||[])), novos:[], removidos:[], lendo:0};
+  return `<div class="field"><span style="display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px">Documentos anexados (opcional)</span>
+    <div id="anxLista"></div>
+    <label class="btn sm sec" style="margin-top:6px">${I.clip}Anexar documento<input type="file" multiple style="display:none" onchange="lerAnexos(this)"></label>
+    <div class="ajuda">PDF, foto, planilha… até 8 MB cada.</div></div>`;
+}
+function desenharAnexos(){
+  const el=$('anxLista'); if(!el||!ANX) return;
+  const itens=[...ANX.lista.map((a,i)=>({...a, k:'l'+i})), ...ANX.novos.map((a,i)=>({...a, k:'n'+i, novo:true}))];
+  el.innerHTML=itens.length?itens.map(a=>`<div class="anx">${I.clip}<span class="nm">${esc(a.nome)}</span><span class="muted">${tamanho(a.tam)}${a.novo?' · novo':''}</span>
+    ${a.novo?'':`<button type="button" class="link" onclick="abrirAnexo('${a.id}')">Abrir</button>`}
+    <button type="button" class="icon-btn" title="Remover" onclick="tirarAnexo('${a.k}')">${I.x}</button></div>`).join(''):(ANX.lendo?'':'<div class="muted" style="font-size:13px">Nenhum documento.</div>');
+  if(ANX.lendo) el.innerHTML+=`<div class="ajuda">Preparando ${ANX.lendo} arquivo(s)…</div>`;
+}
+function tirarAnexo(k){ const i=+k.slice(1); if(k[0]==='n') ANX.novos.splice(i,1); else ANX.removidos.push(...ANX.lista.splice(i,1)); desenharAnexos(); }
+const tamanho = b => b>=1048576 ? (b/1048576).toFixed(1).replace('.',',')+' MB' : Math.max(1,Math.round(b/1024))+' KB';
+function lerArquivo(f){ return new Promise((ok,erro)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=erro; r.readAsDataURL(f); }); }
+async function lerAnexos(inp){
+  const fs=[...(inp.files||[])]; inp.value='';
+  for(const f of fs){
+    if(f.size>ANEXO_MAX){ toast(`"${f.name}" passa de 8 MB.`,true); continue; }
+    ANX.lendo++; desenharAnexos();
+    try{
+      let data, tipo=f.type||'application/octet-stream', nome=f.name;
+      if(/^image\/(jpeg|png|webp|heic|heif)/.test(tipo)){ try{ data=await comprimir(f); tipo='image/jpeg'; nome=nome.replace(/\.(png|webp|heic|heif)$/i,'.jpg'); }catch(e){ data=await lerArquivo(f); } }
+      else data=await lerArquivo(f);
+      ANX.novos.push({nome, tipo, tam:Math.round((data.length-data.indexOf(',')-1)*0.75), data});
+    }catch(e){ console.error(e); toast(`Não foi possível ler "${f.name}".`,true); }
+    ANX.lendo--; desenharAnexos();
+  }
+}
+/* Grava os novos, apaga os removidos e devolve a lista final para guardar no registro. */
+async function salvarAnexos(ref){
+  if(!ANX) return [];
+  if(ANX.lendo){ toast('Aguarde os documentos terminarem de carregar.',true); throw new Error('lendo'); }
+  const final=[...ANX.lista];
+  for(const a of ANX.novos){
+    const id=uid(), partes=Math.ceil(a.data.length/PARTE);
+    for(let i=0;i<partes;i++){ const d=a.data.slice(i*PARTE,(i+1)*PARTE); acompanhar(()=>db.collection('anexos_partes').doc(id+'_'+i).set({d})); }
+    acompanhar(()=>db.collection('anexos').doc(id).set({nome:a.nome, tipo:a.tipo, tam:a.tam, partes, ref:ref||'', criado:Date.now()}));
+    final.push({id, nome:a.nome, tipo:a.tipo, tam:a.tam});
+  }
+  ANX.novos=[];
+  for(const a of ANX.removidos) await apagarAnexoDocs(a.id);
+  ANX.removidos=[];
+  return final;
+}
+async function apagarAnexoDocs(id){
+  let s=null; try{ s=await db.collection('anexos').doc(id).get(); }catch(e){}
+  const n=s&&s.exists ? (s.data().partes||1) : Math.ceil(ANEXO_MAX/PARTE);  // sem sinal: apaga todas as partes possíveis
+  for(let i=0;i<n;i++) acompanhar(()=>db.collection('anexos_partes').doc(id+'_'+i).delete());
+  acompanhar(()=>db.collection('anexos').doc(id).delete());
+}
+function apagarAnexosDe(lista){ (lista||[]).forEach(a=>apagarAnexoDocs(a.id)); }
+async function abrirAnexo(id){
+  const janela=window.open('','_blank');
+  toast('Abrindo documento…');
+  try{
+    const s=await db.collection('anexos').doc(id).get(); if(!s.exists){ if(janela) janela.close(); toast('Documento não encontrado.',true); return; }
+    const a=s.data(); let data='';
+    for(let i=0;i<(a.partes||1);i++){ const p=await db.collection('anexos_partes').doc(id+'_'+i).get(); data+=p.exists?p.data().d:''; }
+    const blob=await (await fetch(data)).blob(), url=URL.createObjectURL(blob);
+    if(janela && /^(image\/|application\/pdf)/.test(a.tipo)){ janela.location.href=url; }
+    else { if(janela) janela.close(); const el=document.createElement('a'); el.href=url; el.download=a.nome; document.body.appendChild(el); el.click(); el.remove(); }
+    window.__ultimoAnexo={nome:a.nome, tipo:a.tipo, bytes:blob.size};
+    setTimeout(()=>URL.revokeObjectURL(url),120000);
+  }catch(e){ console.error(e); if(janela) janela.close(); toast(online()?'Não foi possível abrir o documento.':'Sem internet: esse documento abre quando o sinal voltar.',true); }
+}
+function verAnexos(lista){
+  abrirModal({titulo:'Documentos anexados', ok:'', cancelar:'Fechar',
+    corpo:(lista||[]).map(a=>`<div class="anx">${I.clip}<span class="nm">${esc(a.nome)}</span><span class="muted">${tamanho(a.tam)}</span><button type="button" class="btn sm sec" onclick="abrirAnexo('${a.id}')">Abrir</button></div>`).join('')});
+}
+const clipBtn = lista => (lista&&lista.length) ? `<button class="icon-btn" title="${lista.length} documento(s)" onclick="event.stopPropagation();verAnexos(${esc(JSON.stringify(lista))})">${I.clip}${lista.length>1?`<small>${lista.length}</small>`:''}</button>` : '';
+
+
+/* ============================ LOGIN ============================ */
+function msgLogin(t,tipo){ const m=$('lgMsg'); m.textContent=t; m.className='msg '+(tipo||''); }
+async function entrar(){
+  const e=$('lgEmail').value.trim().toLowerCase(), s=$('lgSenha').value; $('lgBtn').disabled=true; msgLogin('');
+  try{ await auth.signInWithEmailAndPassword(e,s); }
+  catch(err){ const c=err.code||''; msgLogin(/invalid-credential|wrong-password|user-not-found|invalid-email/.test(c)?'E-mail ou senha incorretos.':c==='auth/too-many-requests'?'Muitas tentativas. Aguarde alguns minutos.':c==='auth/network-request-failed'?'Sem conexão com a internet.':'Não foi possível entrar.','err'); }
+  $('lgBtn').disabled=false;
+}
+async function esqueciSenha(){
+  const e=$('lgEmail').value.trim().toLowerCase(); if(!e){ msgLogin('Digite seu e-mail no campo acima e clique de novo.','err'); $('lgEmail').focus(); return; }
+  try{ await auth.sendPasswordResetEmail(e); msgLogin('Se esse e-mail tiver acesso, enviamos um link para '+e+'. Veja também a caixa de spam.','ok'); }
+  catch(err){ msgLogin('Não foi possível enviar o e-mail para esse endereço.','err'); }
+}
+function sair(){
+  fecharMais();
+  if(aguardando||fila||pendente){ confirmar('Sair agora?','Ainda tem lançamento guardado no celular esperando sinal para ir para a nuvem. Se sair agora, ele pode se perder. Espere o sinal voltar antes de sair.','Sair mesmo assim',()=>{ MODAL=null; sairJa(); }); return; }
+  sairJa();
+}
+function sairJa(){ unsubs.forEach(u=>u()); unsubs=[]; try{ localStorage.removeItem(PEND_LOCAL); }catch(e){} auth.signOut().then(()=>location.reload()); }
+
+if('serviceWorker' in navigator && /^(https:|http:\/\/(localhost|127\.0\.0\.1))/.test(location.href)) navigator.serviceWorker.register('sw.js').catch(e=>console.warn('sw',e));
+(function iniciar(){
+  if(typeof firebase==='undefined'){ document.body.innerHTML='<p style="padding:32px;font-family:sans-serif">Não foi possível carregar o sistema. Verifique a internet e recarregue a página.</p>'; return; }
+  firebase.initializeApp(FIREBASE_CONFIG);
+  auth=firebase.auth(); db=firebase.firestore();
+  /* guarda os dados e os lançamentos no celular (precisa vir antes de qualquer leitura) */
+  try{ db.enablePersistence({synchronizeTabs:true}).then(()=>persistente=true).catch(e=>console.warn('sem cache offline',e&&e.code)); }catch(e){ console.warn(e); }
+  cadRef=db.collection('dados').doc('geral');
+  const h=(location.hash||'').slice(1); if(PAGS.some(p=>p.id===h)) pag=h;
+  auth.onAuthStateChanged(u=>{
+    if(u){ $('login').style.display='none'; $('app').style.display='block'; $('contaEmail').textContent=u.email; escutar(); atualizarRede(); if(aguardando) marcarAguardando(); }
+    else { $('app').style.display='none'; $('login').style.display='grid'; }
+  });
+  window.addEventListener('beforeunload',e=>{ enviarCad(); if(!persistente && (fila>0)){ e.preventDefault(); e.returnValue=''; } });
+})();
+
+</script>
+</body>
+</html>
